@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.marcofidel_dev.inventario.ui.controller.MainController">
+
+    <!-- Barra lateral de navegación -->
+    <left>
+        <VBox spacing="10" style="-fx-background-color: linear-gradient(to bottom, #C2185B, #880E4F); -fx-padding: 20;">
+            <Label text="Sistema Inventario" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 1);"/>
+            <Separator style="-fx-background-color: rgba(255,255,255,0.3);"/>
+
+            <Button text="📊 Panel de Gestión" onAction="#mostrarDashboard" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+            <Button text="📦 Productos" onAction="#mostrarProductos" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+            <Button text=" Compras" onAction="#mostrarCompras" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+            <Button text="💾 Backup" onAction="#mostrarBackup" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+
+            <VBox.margin>
+                <Insets top="10"/>
+            </VBox.margin>
+        </VBox>
+    </left>
+
+    <!-- Área de contenido principal -->
+    <center>
+        <StackPane fx:id="contentArea" style="-fx-background-color: #FCE4EC;">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+        </StackPane>
+    </center>
+
+</BorderPane>
+

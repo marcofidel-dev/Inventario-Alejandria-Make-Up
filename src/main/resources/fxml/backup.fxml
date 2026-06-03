@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.marcofidel_dev.inventario.ui.controller.BackupController"
+      spacing="20" style="-fx-padding: 20; -fx-background-color: #FCE4EC;" alignment="CENTER">
+
+    <Label text="Gestión de Backups" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+
+    <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 3);"
+          alignment="CENTER" maxWidth="600">
+
+        <Label text="💾 Crear Backup" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #E91E63;"/>
+        <Label text="Crea una copia de seguridad de la base de datos"
+               style="-fx-text-fill: #4A148C; -fx-text-alignment: center; -fx-font-weight: 600;" wrapText="true"/>
+
+        <Button text="📁 Seleccionar carpeta y crear backup" onAction="#crearBackup"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 12 24; -fx-background-radius: 8; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+
+        <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #F3E5F5; -fx-padding: 10; -fx-background-radius: 8;">
+            <Label text="Último backup:" style="-fx-font-weight: 600; -fx-text-fill: #4A148C;"/>
+            <Label fx:id="lblUltimoBackup" text="Ninguno" style="-fx-font-weight: bold; -fx-text-fill: #E91E63;"/>
+        </HBox>
+    </VBox>
+
+    <Separator style="-fx-background-color: #E91E63;"/>
+
+    <VBox spacing="15" style="-fx-background-color: #FFEBEE; -fx-padding: 30; -fx-background-radius: 15; -fx-border-color: #D32F2F; -fx-border-width: 2; -fx-border-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 3);"
+          alignment="CENTER" maxWidth="600">
+
+        <Label text="⚠️ Restaurar Backup" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #D32F2F;"/>
+        <Label text="ADVERTENCIA: Esta acción reemplazará la base de datos actual. Se creará una copia de seguridad antes de restaurar."
+               style="-fx-text-fill: #C62828; -fx-text-alignment: center; -fx-font-weight: 600;" wrapText="true"/>
+
+        <Label text="⚠️ DEBE REINICIAR LA APLICACIÓN DESPUÉS DE RESTAURAR"
+               style="-fx-font-weight: bold; -fx-text-fill: #D32F2F; -fx-text-alignment: center; -fx-font-size: 14px;" wrapText="true"/>
+
+        <Button text="📂 Seleccionar archivo y restaurar" onAction="#restaurarBackup"
+                style="-fx-background-color: #F44336; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 12 24; -fx-background-radius: 8; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+    </VBox>
+
+    <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-border-color: #E91E63; -fx-border-width: 2; -fx-border-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 3);" maxWidth="600">
+        <Label text="ℹ️ Información" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #880E4F;"/>
+        <Label text="• Los backups incluyen toda la información: productos, pedidos, compras" wrapText="true"
+               style="-fx-text-fill: #4A148C; -fx-font-weight: 600;"/>
+        <Label text="• El archivo se guarda con formato: inventario_YYYY-MM-DD_HH-mm.db" wrapText="true"
+               style="-fx-text-fill: #4A148C; -fx-font-weight: 600;"/>
+        <Label text="• Se recomienda hacer backups periódicos" wrapText="true"
+               style="-fx-text-fill: #4A148C; -fx-font-weight: 600;"/>
+    </VBox>
+
+</VBox>
+

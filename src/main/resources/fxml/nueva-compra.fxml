@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.marcofidel_dev.inventario.ui.controller.NuevaCompraController"
+            fitToWidth="true" fitToHeight="false" style="-fx-background-color: #FCE4EC;">
+
+    <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: #FCE4EC;"
+          minWidth="900" prefWidth="950" minHeight="700" prefHeight="750">
+
+        <!-- TITULO -->
+        <Label text="Nueva Compra a Proveedor" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+
+        <!-- SECCION: DATOS DEL PROVEEDOR -->
+        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+            <Label text="Datos del Proveedor" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #880E4F;"/>
+
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Proveedor:" style="-fx-font-weight: 600; -fx-text-fill: #4A148C; -fx-min-width: 80;"/>
+                <TextField fx:id="tfProveedor" prefWidth="300" promptText="Nombre del proveedor"
+                           style="-fx-padding: 8; -fx-font-size: 12px;"/>
+            </HBox>
+
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Fecha:" style="-fx-font-weight: 600; -fx-text-fill: #4A148C; -fx-min-width: 80;"/>
+                <DatePicker fx:id="dpFecha" prefWidth="200" style="-fx-padding: 8;"/>
+            </HBox>
+        </VBox>
+
+        <!-- SECCION: AGREGAR PRODUCTOS -->
+        <VBox spacing="12" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+            <Label text="Agregar Productos a la Compra" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #880E4F;"/>
+
+            <!-- Fila 1: Producto -->
+            <HBox spacing="10" alignment="TOP_LEFT">
+                <Label text="Producto:" style="-fx-font-weight: 600; -fx-text-fill: #4A148C; -fx-min-width: 80;"/>
+                <ComboBox fx:id="cmbProducto" prefWidth="350" promptText="Seleccionar producto..."
+                          style="-fx-padding: 8; -fx-font-size: 12px;" HBox.hgrow="ALWAYS"/>
+                <Button text="NUEVO" onAction="#crearNuevoProducto"
+                        style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 12; -fx-font-weight: 600; -fx-cursor: hand; -fx-font-size: 11px;"/>
+            </HBox>
+
+            <!-- Fila 2: Cantidad y Costo -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Cantidad:" style="-fx-font-weight: 600; -fx-text-fill: #4A148C; -fx-min-width: 80;"/>
+                <TextField fx:id="tfCantidad" prefWidth="80" promptText="10"
+                           style="-fx-padding: 8; -fx-font-size: 12px;"/>
+                <Label text="Costo Unitario:" style="-fx-font-weight: 600; -fx-text-fill: #4A148C; -fx-min-width: 100;"/>
+                <TextField fx:id="tfCostoUnitario" prefWidth="100" promptText="15.50"
+                           style="-fx-padding: 8; -fx-font-size: 12px;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="AGREGAR" onAction="#agregarItem"
+                        style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 8 16; -fx-font-weight: 600; -fx-cursor: hand;"/>
+            </HBox>
+        </VBox>
+
+        <!-- SECCION: TABLA DE PRODUCTOS -->
+        <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2); -fx-min-height: 280;">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Productos en la Compra" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #880E4F;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="QUITAR" onAction="#quitarItem"
+                        style="-fx-background-color: #F44336; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 6 12; -fx-font-weight: 600; -fx-cursor: hand;"/>
+            </HBox>
+
+            <TableView fx:id="tblItems" VBox.vgrow="ALWAYS" style="-fx-background-radius: 8; -fx-font-size: 11px; -fx-min-height: 250;">
+                <columns>
+                    <TableColumn fx:id="colProducto" text="Producto" prefWidth="350"/>
+                    <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="100"/>
+                    <TableColumn fx:id="colCostoUnitario" text="Costo Unitario" prefWidth="150"/>
+                    <TableColumn fx:id="colSubtotal" text="Subtotal" prefWidth="150"/>
+                </columns>
+            </TableView>
+        </VBox>
+
+        <!-- SECCION: TOTAL -->
+        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10; -fx-background-color: #F3E5F5; -fx-background-radius: 8;">
+            <Label fx:id="lblTotal" text="Total: $ 0.000"
+                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+        </HBox>
+
+        <!-- SECCION: BOTONES DE ACCION -->
+        <HBox spacing="15" alignment="CENTER" style="-fx-padding: 20; -fx-background-color: #F3E5F5; -fx-background-radius: 10;">
+            <Button text="GUARDAR COMPRA" onAction="#guardar"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 15 40; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14px;"/>
+            <Button text="CANCELAR" onAction="#cancelar"
+                    style="-fx-background-color: #9E9E9E; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 15 40; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-size: 14px;"/>
+        </HBox>
+
+    </VBox>
+</ScrollPane>
+
