@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.marcofidel_dev.inventario.ui.controller.UserManagementController"
+            style="-fx-background-color: #FCE4EC;">
+
+    <top>
+        <VBox spacing="15" style="-fx-padding: 20; -fx-background-color: white;
+                                   -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+            <Label text="Gestión de Usuarios" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+            <HBox spacing="10">
+                <Button text="➕ Nuevo Usuario" onAction="#nuevoUsuario"
+                        style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 8;
+                               -fx-padding: 8 16; -fx-font-weight: 600; -fx-cursor: hand;
+                               -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+                <Button text="🚫 Desactivar" onAction="#desactivarUsuario"
+                        style="-fx-background-color: #F44336; -fx-text-fill: white; -fx-background-radius: 8;
+                               -fx-padding: 8 16; -fx-font-weight: 600; -fx-cursor: hand;
+                               -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+                <Button text="🔄 Cambiar Rol" onAction="#cambiarRol"
+                        style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-background-radius: 8;
+                               -fx-padding: 8 16; -fx-font-weight: 600; -fx-cursor: hand;
+                               -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="10" style="-fx-padding: 15; -fx-background-color: white; -fx-background-radius: 10;
+                                   -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+            <BorderPane.margin><Insets top="10" right="10" bottom="10" left="10"/></BorderPane.margin>
+
+            <TableView fx:id="tblUsuarios" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colId"       text="ID"        prefWidth="50"/>
+                    <TableColumn fx:id="colUsername"  text="Usuario"   prefWidth="150"/>
+                    <TableColumn fx:id="colNombre"    text="Nombre"    prefWidth="200"/>
+                    <TableColumn fx:id="colRol"       text="Rol"       prefWidth="120"/>
+                    <TableColumn fx:id="colActivo"    text="Estado"    prefWidth="100"/>
+                </columns>
+                <placeholder><Label text="No hay usuarios registrados"/></placeholder>
+            </TableView>
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -1,7 +1,11 @@
 package com.marcofidel_dev.inventario.application.service;
 
+import com.marcofidel_dev.inventario.domain.entity.AuditAction;
 import com.marcofidel_dev.inventario.domain.entity.Producto;
+import com.marcofidel_dev.inventario.domain.entity.Role;
 import com.marcofidel_dev.inventario.infrastructure.repository.ProductoRepository;
+import com.marcofidel_dev.inventario.infrastructure.security.Audited;
+import com.marcofidel_dev.inventario.infrastructure.security.RequiresRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -56,6 +60,8 @@ public class ProductoService {
         return productoRepository.findProductosConStockBajo();
     }
 
+    @RequiresRole(Role.ADMIN)
+    @Audited(action = AuditAction.CREATE, entity = "Producto")
     @Transactional
     public Producto guardar(Producto producto) {
         log.info("Guardando producto: {}", producto.getNombre());
@@ -71,6 +77,8 @@ public class ProductoService {
         return productoRepository.save(producto);
     }
 
+    @RequiresRole(Role.ADMIN)
+    @Audited(action = AuditAction.DELETE, entity = "Producto")
     @Transactional
     public void eliminar(Long id) {
         log.info("Desactivando producto con ID: {}", id);

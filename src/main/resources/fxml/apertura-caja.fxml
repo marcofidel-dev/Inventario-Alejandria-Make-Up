@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.marcofidel_dev.inventario.ui.controller.AperturaCajaController"
+      spacing="24" alignment="CENTER"
+      style="-fx-background-color: linear-gradient(to bottom, #C2185B, #880E4F); -fx-padding: 40;">
+
+    <Label text="Apertura de Caja"
+           style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;
+                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 2);"/>
+
+    <VBox spacing="18" maxWidth="380"
+          style="-fx-background-color: white; -fx-background-radius: 14; -fx-padding: 30;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0, 0, 4);">
+
+        <!-- User + date info -->
+        <GridPane hgap="12" vgap="8">
+            <columnConstraints>
+                <ColumnConstraints minWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            <Label text="Usuario:" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                   style="-fx-font-weight: 600; -fx-text-fill: #4A148C;"/>
+            <Label fx:id="lblUsuario" text="" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                   style="-fx-font-weight: 700; -fx-text-fill: #880E4F; -fx-font-size: 14px;"/>
+            <Label text="Fecha:" GridPane.rowIndex="1" GridPane.columnIndex="0"
+                   style="-fx-font-weight: 600; -fx-text-fill: #4A148C;"/>
+            <Label fx:id="lblFecha" text="" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                   style="-fx-text-fill: #555555;"/>
+        </GridPane>
+
+        <Separator/>
+
+        <VBox spacing="6">
+            <Label text="Efectivo inicial ($):"
+                   style="-fx-font-weight: 600; -fx-text-fill: #4A148C; -fx-font-size: 13px;"/>
+            <TextField fx:id="txtEfectivoInicial" promptText="0"
+                       style="-fx-background-radius: 8; -fx-padding: 10; -fx-border-color: #E0E0E0;
+                              -fx-border-radius: 8; -fx-font-size: 16px; -fx-text-alignment: right;"/>
+        </VBox>
+
+        <VBox spacing="6">
+            <Label text="Observaciones (opcional):"
+                   style="-fx-font-weight: 600; -fx-text-fill: #4A148C;"/>
+            <TextArea fx:id="txtObservaciones" promptText="Ej: Cuadre del turno anterior"
+                      prefRowCount="2" wrapText="true"
+                      style="-fx-background-radius: 8; -fx-border-color: #E0E0E0; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <Label fx:id="lblError" text="" wrapText="true" maxWidth="340"
+               style="-fx-text-fill: #D32F2F; -fx-font-size: 12px;"/>
+
+        <Button fx:id="btnAbrirCaja" text="Abrir Caja" onAction="#abrirCaja"
+                maxWidth="Infinity"
+                style="-fx-background-color: #C2185B; -fx-text-fill: white; -fx-font-size: 16px;
+                       -fx-font-weight: 700; -fx-background-radius: 8; -fx-padding: 14;
+                       -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 3);"/>
+    </VBox>
+</VBox>

@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 @Slf4j
@@ -35,13 +33,9 @@ public class SpringFXMLLoader {
         return loader.load();
     }
 
-    /**
-     * Carga un FXML y devuelve tanto el root como el controlador
-     * @param fxmlPath ruta del archivo FXML
-     * @return mapa con "root" y "controller"
-     */
-    public Map<String, Object> loadWithController(String fxmlPath) throws IOException {
-        log.debug("Cargando FXML con controlador: {}", fxmlPath);
+    /** Loads an FXML and returns both the root node and the Spring-managed controller. */
+    public java.util.Map<String, Object> loadWithController(String fxmlPath) throws IOException {
+        log.debug("Cargando FXML con controller: {}", fxmlPath);
 
         URL url = getClass().getResource(fxmlPath);
         if (url == null) {
@@ -50,14 +44,9 @@ public class SpringFXMLLoader {
 
         FXMLLoader loader = new FXMLLoader(url);
         loader.setControllerFactory(context::getBean);
-
         Parent root = loader.load();
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("root", root);
-        result.put("controller", loader.getController());
-        
-        return result;
+
+        return java.util.Map.of("root", root, "controller", loader.getController());
     }
 }
 

@@ -41,6 +41,9 @@ public class Compra {
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<CompraItem> items = new ArrayList<>();
 
+    @Column(name = "created_by_user_id")
+    private Long createdByUserId;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

@@ -9,18 +9,89 @@
 
     <!-- Barra lateral de navegación -->
     <left>
-        <VBox spacing="10" style="-fx-background-color: linear-gradient(to bottom, #C2185B, #880E4F); -fx-padding: 20;">
-            <Label text="Sistema Inventario" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 1);"/>
+        <VBox spacing="6" style="-fx-background-color: linear-gradient(to bottom, #C2185B, #880E4F); -fx-padding: 16 14;">
+
+            <Label text="Sistema Inventario"
+                   style="-fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: bold;
+                          -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 1);"/>
+            <Separator style="-fx-background-color: rgba(255,255,255,0.3); -fx-padding: 2 0;"/>
+
+            <!-- ── POS: Nueva Venta — el botón principal ── -->
+            <Button text="🛒 Nueva Venta" onAction="#mostrarPos" maxWidth="Infinity"
+                    style="-fx-background-color: white; -fx-text-fill: #880E4F; -fx-background-radius: 10;
+                           -fx-padding: 14; -fx-font-size: 15px; -fx-font-weight: 900; -fx-cursor: hand;
+                           -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 8, 0, 0, 3);"/>
+
+            <!-- ── POS: Caja & Mis Ventas ── -->
+            <Button text="💳 Caja" onAction="#mostrarCaja" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <Button text="📋 Mis Ventas" onAction="#mostrarMisVentas" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <Separator style="-fx-background-color: rgba(255,255,255,0.2);"/>
+
+            <!-- ── Shared: Productos & Clientes ── -->
+            <Button text="📦 Productos" onAction="#mostrarProductos" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <Button text="👥 Clientes" onAction="#mostrarClientes" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <!-- ── ADMIN section (hidden for COLABORADOR) ── -->
+            <Separator fx:id="separadorAdmin" style="-fx-background-color: rgba(255,255,255,0.3);"/>
+
+            <Label fx:id="lblAdminSection" text="— ADMIN —"
+                   style="-fx-text-fill: rgba(255,255,255,0.55); -fx-font-size: 10px; -fx-font-weight: 600;
+                          -fx-padding: 2 0 0 0;" maxWidth="Infinity"/>
+
+            <Button fx:id="btnCompras" text="🛍️ Compras" onAction="#mostrarCompras" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <Button fx:id="btnUsuarios" text="👤 Usuarios" onAction="#mostrarUsuarios" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <Button fx:id="btnDashboard" text="📊 Dashboard" onAction="#mostrarDashboard" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <Button fx:id="btnReporteVentas" text="📈 Ventas" onAction="#mostrarReporteVentas" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <Button fx:id="btnReporteInventario" text="📦 Inventario" onAction="#mostrarReporteInventario" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <Button fx:id="btnReporteClientes" text="👥 Clientes" onAction="#mostrarReporteClientes" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <Button fx:id="btnReporteCaja" text="💰 Caja" onAction="#mostrarReporteCaja" maxWidth="Infinity"
+                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-size: 13px; -fx-font-weight: 600; -fx-cursor: hand;"/>
+
+            <!-- Spacer pushes user info to bottom -->
+            <Region VBox.vgrow="ALWAYS"/>
+
             <Separator style="-fx-background-color: rgba(255,255,255,0.3);"/>
 
-            <Button text="📊 Panel de Gestión" onAction="#mostrarDashboard" maxWidth="Infinity"
-                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
-            <Button text="📦 Productos" onAction="#mostrarProductos" maxWidth="Infinity"
-                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
-            <Button text=" Compras" onAction="#mostrarCompras" maxWidth="Infinity"
-                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
-            <Button text="💾 Backup" onAction="#mostrarBackup" maxWidth="Infinity"
-                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 14px; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+            <!-- Current user info -->
+            <Label fx:id="lblUsuarioNombre" text=""
+                   style="-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: 600;"/>
+            <Label fx:id="lblUsuarioRol" text=""
+                   style="-fx-text-fill: rgba(255,255,255,0.75); -fx-font-size: 11px;"/>
+
+            <Button text="🚪 Cerrar Sesión" onAction="#cerrarSesion" maxWidth="Infinity"
+                    style="-fx-background-color: rgba(0,0,0,0.25); -fx-text-fill: white;
+                           -fx-background-radius: 8; -fx-padding: 10; -fx-font-size: 13px;
+                           -fx-font-weight: 600; -fx-cursor: hand;"/>
 
             <VBox.margin>
                 <Insets top="10"/>
@@ -38,4 +109,3 @@
     </center>
 
 </BorderPane>
-

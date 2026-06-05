@@ -2,11 +2,13 @@ package com.marcofidel_dev.inventario.ui.controller;
 
 import com.marcofidel_dev.inventario.application.service.ProductoService;
 import com.marcofidel_dev.inventario.domain.entity.Producto;
+import com.marcofidel_dev.inventario.ui.common.UIPermissionService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TableCell;
+import javafx.scene.control.ScrollPane;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,7 @@ import java.util.Locale;
 public class ProductosController {
 
     private final ProductoService productoService;
+    private final UIPermissionService uiPermissionService;
 
     @FXML
     private TextField txtBuscar;
@@ -74,6 +77,10 @@ public class ProductosController {
     @FXML
     private CheckBox chkActivo;
 
+    // Permission-controlled nodes (colCosto declared above with other columns)
+    @FXML private Button btnNuevo;
+    @FXML private ScrollPane pnlForm;
+
     private Producto productoSeleccionado;
 
     @FXML
@@ -82,7 +89,17 @@ public class ProductosController {
         configurarTabla();
         configurarFiltros();
         configurarFormatoPrecios();
+        aplicarPermisos();
         cargarProductos();
+    }
+
+    private void aplicarPermisos() {
+        boolean esAdmin = uiPermissionService.isAdmin();
+        // TableColumn is not a Node — use setVisible directly
+        colCosto.setVisible(esAdmin);
+        // Buttons and panels are Nodes — delegate to UIPermissionService
+        uiPermissionService.hideIfNotAdmin(btnNuevo);
+        uiPermissionService.hideIfNotAdmin(pnlForm);
     }
 
     private void configurarFormatoPrecios() {

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.marcofidel_dev.inventario.ui.controller.CierreCajaController"
+      spacing="0" alignment="TOP_CENTER"
+      style="-fx-background-color: linear-gradient(to bottom, #C2185B, #880E4F);">
+
+    <!-- Header -->
+    <HBox alignment="CENTER" style="-fx-padding: 20 30 16 30;">
+        <Label text="Cierre de Caja"
+               style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;
+                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 2);"/>
+    </HBox>
+
+    <!-- Main card -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;">
+        <VBox spacing="16" maxWidth="480"
+              style="-fx-background-color: white; -fx-background-radius: 14 14 0 0; -fx-padding: 28;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, -3);">
+            <VBox.margin>
+                <Insets left="20" right="20"/>
+            </VBox.margin>
+
+            <!-- Session summary -->
+            <Label text="Resumen de sesión"
+                   style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+
+            <GridPane hgap="20" vgap="6">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="180"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Apertura:" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                       style="-fx-text-fill: #555; -fx-font-weight: 600;"/>
+                <Label fx:id="lblFechaApertura" text="" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                       style="-fx-text-fill: #333;"/>
+
+                <Label text="Efectivo inicial:" GridPane.rowIndex="1" GridPane.columnIndex="0"
+                       style="-fx-text-fill: #555; -fx-font-weight: 600;"/>
+                <Label fx:id="lblEfectivoInicial" text="" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                       style="-fx-font-weight: 700; -fx-text-fill: #333;"/>
+
+                <Separator GridPane.rowIndex="2" GridPane.columnSpan="2" style="-fx-opacity: 0.4;"/>
+
+                <Label text="Ventas en efectivo:" GridPane.rowIndex="3" GridPane.columnIndex="0"
+                       style="-fx-text-fill: #555; -fx-font-weight: 600;"/>
+                <Label fx:id="lblVentasEfectivo" text="" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                       style="-fx-text-fill: #333;"/>
+
+                <Label text="Ventas en tarjeta:" GridPane.rowIndex="4" GridPane.columnIndex="0"
+                       style="-fx-text-fill: #555; -fx-font-weight: 600;"/>
+                <Label fx:id="lblVentasTarjeta" text="" GridPane.rowIndex="4" GridPane.columnIndex="1"
+                       style="-fx-text-fill: #333;"/>
+
+                <Label text="Ventas en transferencia:" GridPane.rowIndex="5" GridPane.columnIndex="0"
+                       style="-fx-text-fill: #555; -fx-font-weight: 600;"/>
+                <Label fx:id="lblVentasTransferencia" text="" GridPane.rowIndex="5" GridPane.columnIndex="1"
+                       style="-fx-text-fill: #333;"/>
+
+                <Label text="Nequi / Daviplata:" GridPane.rowIndex="6" GridPane.columnIndex="0"
+                       style="-fx-text-fill: #555; -fx-font-weight: 600;"/>
+                <Label fx:id="lblVentasOtros" text="" GridPane.rowIndex="6" GridPane.columnIndex="1"
+                       style="-fx-text-fill: #333;"/>
+
+                <Separator GridPane.rowIndex="7" GridPane.columnSpan="2" style="-fx-opacity: 0.4;"/>
+
+                <Label text="Total ventas:" GridPane.rowIndex="8" GridPane.columnIndex="0"
+                       style="-fx-font-weight: bold; -fx-text-fill: #333;"/>
+                <Label fx:id="lblTotalVentas" text="" GridPane.rowIndex="8" GridPane.columnIndex="1"
+                       style="-fx-font-weight: bold; -fx-text-fill: #333;"/>
+
+                <Label text="Cantidad de ventas:" GridPane.rowIndex="9" GridPane.columnIndex="0"
+                       style="-fx-text-fill: #555; -fx-font-weight: 600;"/>
+                <Label fx:id="lblCantidadVentas" text="0" GridPane.rowIndex="9" GridPane.columnIndex="1"
+                       style="-fx-text-fill: #333;"/>
+
+                <Separator GridPane.rowIndex="10" GridPane.columnSpan="2"
+                           style="-fx-background-color: #E91E63; -fx-opacity: 0.7;"/>
+
+                <Label text="Efectivo esperado:" GridPane.rowIndex="11" GridPane.columnIndex="0"
+                       style="-fx-font-weight: bold; -fx-text-fill: #880E4F; -fx-font-size: 14px;"/>
+                <Label fx:id="lblEfectivoEsperado" text="" GridPane.rowIndex="11" GridPane.columnIndex="1"
+                       style="-fx-font-weight: bold; -fx-text-fill: #880E4F; -fx-font-size: 14px;"/>
+            </GridPane>
+
+            <Separator/>
+
+            <!-- Declared cash -->
+            <VBox spacing="6">
+                <Label text="Efectivo declarado ($):"
+                       style="-fx-font-weight: 600; -fx-text-fill: #4A148C; -fx-font-size: 13px;"/>
+                <TextField fx:id="txtEfectivoDeclarado" promptText="0"
+                           onKeyReleased="#recalcularDiferencia"
+                           style="-fx-background-radius: 8; -fx-padding: 10; -fx-border-color: #E0E0E0;
+                                  -fx-border-radius: 8; -fx-font-size: 16px; -fx-text-alignment: right;"/>
+            </VBox>
+
+            <!-- Difference (auto-calculated, color-coded) -->
+            <HBox alignment="CENTER_LEFT" spacing="10"
+                  style="-fx-background-color: #F5F5F5; -fx-padding: 12; -fx-background-radius: 8;">
+                <Label text="Diferencia:" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333;"/>
+                <Label fx:id="lblDiferencia" text="—"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #888888;"/>
+                <Label fx:id="lblDiferenciaTag" text=""
+                       style="-fx-font-size: 12px; -fx-text-fill: #888888; -fx-font-style: italic;"/>
+            </HBox>
+
+            <!-- Notes -->
+            <VBox spacing="6">
+                <Label text="Observaciones:" style="-fx-font-weight: 600; -fx-text-fill: #4A148C;"/>
+                <TextArea fx:id="txtObservaciones" promptText="Notas del cierre (opcional)"
+                          prefRowCount="2" wrapText="true"
+                          style="-fx-background-radius: 8; -fx-border-color: #E0E0E0; -fx-border-radius: 8;"/>
+            </VBox>
+
+            <Label fx:id="lblError" text="" wrapText="true"
+                   style="-fx-text-fill: #D32F2F; -fx-font-size: 12px;"/>
+
+            <!-- Action buttons -->
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <Button text="Cancelar" onAction="#cancelar"
+                        style="-fx-background-color: #EEEEEE; -fx-text-fill: #555; -fx-background-radius: 8;
+                               -fx-padding: 10 20; -fx-font-weight: 600; -fx-cursor: hand;"/>
+                <Button fx:id="btnCerrarCaja" text="Cerrar Caja" onAction="#cerrarCaja"
+                        style="-fx-background-color: #880E4F; -fx-text-fill: white; -fx-background-radius: 8;
+                               -fx-padding: 10 20; -fx-font-weight: 700; -fx-font-size: 14px; -fx-cursor: hand;
+                               -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 6, 0, 0, 2);"/>
+            </HBox>
+
+        </VBox>
+    </ScrollPane>
+</VBox>

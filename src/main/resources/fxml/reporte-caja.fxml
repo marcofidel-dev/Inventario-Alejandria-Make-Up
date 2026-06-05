@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.marcofidel_dev.inventario.ui.controller.ReporteCajaController"
+      spacing="14" style="-fx-padding: 20; -fx-background-color: #FCE4EC;">
+
+    <!-- Header + filtro período -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="Historial de Caja"
+               style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label text="Desde:" style="-fx-font-weight: 600;"/>
+        <DatePicker fx:id="dpDesde" prefWidth="130"/>
+        <Label text="hasta:" style="-fx-font-weight: 600;"/>
+        <DatePicker fx:id="dpHasta" prefWidth="130"/>
+        <Button text="Consultar" onAction="#consultar"
+                style="-fx-background-color: #880E4F; -fx-text-fill: white; -fx-background-radius: 8;
+                       -fx-padding: 8 16; -fx-font-weight: 600; -fx-cursor: hand;"/>
+    </HBox>
+
+    <!-- Resumen descuadres -->
+    <HBox spacing="20" alignment="CENTER_LEFT"
+          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+        <Label text="Resumen" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+        <Separator orientation="VERTICAL"/>
+        <VBox spacing="3" alignment="CENTER">
+            <Label text="Sesiones" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+            <Label fx:id="lblSesiones" text="" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        </VBox>
+        <VBox spacing="3" alignment="CENTER">
+            <Label text="Descuadres" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+            <Label fx:id="lblDescuadres" text="" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #D32F2F;"/>
+        </VBox>
+        <VBox spacing="3" alignment="CENTER">
+            <Label text="Total faltante" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+            <Label fx:id="lblFaltante" text="" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #D32F2F;"/>
+        </VBox>
+        <VBox spacing="3" alignment="CENTER">
+            <Label text="Total sobrante" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+            <Label fx:id="lblSobrante" text="" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #F57C00;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Tabla sesiones -->
+    <VBox spacing="8" VBox.vgrow="ALWAYS"
+          style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+        <Label text="Sesiones de Caja (doble clic para ver detalle)"
+               style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+        <TableView fx:id="tblSesiones" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colSFecha"      text="Fecha apertura"   prefWidth="150"/>
+                <TableColumn fx:id="colSUsuario"    text="Usuario"          prefWidth="140"/>
+                <TableColumn fx:id="colSApertura"   text="Apertura"         prefWidth="100"/>
+                <TableColumn fx:id="colSEsperado"   text="Esperado"         prefWidth="100"/>
+                <TableColumn fx:id="colSDeclarado"  text="Declarado"        prefWidth="100"/>
+                <TableColumn fx:id="colSDiferencia" text="Diferencia"       prefWidth="100"/>
+                <TableColumn fx:id="colSEstado"     text="Estado"           prefWidth="90"/>
+            </columns>
+        </TableView>
+        <Label text="✅ Cuadrado   🔴 Faltante   🟡 Sobrante"
+               style="-fx-font-size: 11px; -fx-text-fill: #9E9E9E;"/>
+    </VBox>
+
+</VBox>

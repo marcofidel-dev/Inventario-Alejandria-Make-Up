@@ -1,46 +1,168 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.effect.DropShadow?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.marcofidel_dev.inventario.ui.controller.DashboardController"
-      spacing="20" style="-fx-padding: 20; -fx-background-color: #FCE4EC;">
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.marcofidel_dev.inventario.ui.controller.DashboardController"
+            style="-fx-background-color: #FCE4EC;">
 
-    <Label text="Panel de Control de Inventarios" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+    <VBox spacing="16" style="-fx-padding: 20; -fx-background-color: #FCE4EC;">
 
-    <!-- Contadores con efectos de sombra -->
-    <HBox spacing="20" alignment="CENTER_LEFT">
-        <VBox spacing="5" style="-fx-background-color: linear-gradient(to bottom, #E91E63, #C2185B); -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);">
-            <Label text="Total Productos" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600;"/>
-            <Label fx:id="lblTotalProductos" text="0" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
-        </VBox>
-
-        <VBox spacing="5" style="-fx-background-color: linear-gradient(to bottom, #F57C00, #E65100); -fx-padding: 25; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 3);">
-            <Label text="Stock Bajo" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600;"/>
-            <Label fx:id="lblProductosStockBajo" text="0" style="-fx-text-fill: white; -fx-font-size: 32px; -fx-font-weight: bold;"/>
-        </VBox>
-    </HBox>
-
-    <!-- Productos con stock bajo -->
-    <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
-        <HBox alignment="CENTER_LEFT" spacing="10">
-            <Label text="Productos con Stock Bajo" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+        <!-- ── Header ── -->
+        <HBox alignment="CENTER_LEFT" spacing="16">
+            <Label text="Dashboard" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Período:" style="-fx-font-size: 13px; -fx-text-fill: #880E4F; -fx-font-weight: 600;"/>
+            <ComboBox fx:id="cbPeriodo" prefWidth="160"
+                      style="-fx-background-radius: 8; -fx-border-radius: 8;"/>
+            <DatePicker fx:id="dpDesde" prefWidth="130" promptText="Desde"
+                        style="-fx-background-radius: 8;" visible="false" managed="false"/>
+            <DatePicker fx:id="dpHasta" prefWidth="130" promptText="Hasta"
+                        style="-fx-background-radius: 8;" visible="false" managed="false"/>
             <Button text="🔄 Actualizar" onAction="#cargarDatos"
-                    style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16; -fx-font-weight: 600; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
+                    style="-fx-background-color: #880E4F; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 8 16; -fx-font-weight: 600; -fx-cursor: hand;"/>
         </HBox>
 
-        <TableView fx:id="tblStockBajo" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 5;">
-            <columns>
-                <TableColumn fx:id="colProductoNombre" text="Producto" prefWidth="200"/>
-                <TableColumn fx:id="colProductoTipo" text="Tipo" prefWidth="100"/>
-                <TableColumn fx:id="colProductoStock" text="Stock Actual" prefWidth="100"/>
-                <TableColumn fx:id="colProductoStockMin" text="Stock Mínimo" prefWidth="100"/>
-            </columns>
-        </TableView>
+        <!-- ── KPI Cards ── -->
+        <HBox spacing="12" fillHeight="true">
+            <VBox fx:id="cardVendido" spacing="4" alignment="CENTER"
+                  style="-fx-background-color: linear-gradient(to bottom, #E91E63, #C2185B);
+                         -fx-background-radius: 14; -fx-padding: 20;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 8, 0, 0, 3);"
+                  HBox.hgrow="ALWAYS">
+                <Label text="Vendido Hoy" style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 12px;"/>
+                <Label fx:id="lblVendido" text="" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;"/>
+                <Label fx:id="lblVendidoCambio" text="" style="-fx-text-fill: rgba(255,255,255,0.75); -fx-font-size: 11px;"/>
+            </VBox>
+            <VBox fx:id="cardUtilidad" spacing="4" alignment="CENTER"
+                  style="-fx-background-color: linear-gradient(to bottom, #4CAF50, #388E3C);
+                         -fx-background-radius: 14; -fx-padding: 20;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 8, 0, 0, 3);"
+                  HBox.hgrow="ALWAYS">
+                <Label text="Utilidad" style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 12px;"/>
+                <Label fx:id="lblUtilidad" text="" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;"/>
+                <Label fx:id="lblMargen" text="" style="-fx-text-fill: rgba(255,255,255,0.75); -fx-font-size: 11px;"/>
+            </VBox>
+            <VBox spacing="4" alignment="CENTER"
+                  style="-fx-background-color: linear-gradient(to bottom, #FF9800, #F57C00);
+                         -fx-background-radius: 14; -fx-padding: 20;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 8, 0, 0, 3);"
+                  HBox.hgrow="ALWAYS">
+                <Label text="Ventas" style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 12px;"/>
+                <Label fx:id="lblVentas" text="" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;"/>
+                <Label fx:id="lblMejorVendedor" text="" style="-fx-text-fill: rgba(255,255,255,0.75); -fx-font-size: 11px;"/>
+            </VBox>
+            <VBox spacing="4" alignment="CENTER"
+                  style="-fx-background-color: linear-gradient(to bottom, #9C27B0, #6A1B9A);
+                         -fx-background-radius: 14; -fx-padding: 20;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 8, 0, 0, 3);"
+                  HBox.hgrow="ALWAYS">
+                <Label text="Ticket Promedio" style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 12px;"/>
+                <Label fx:id="lblTicket" text="" style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;"/>
+                <Label fx:id="lblProductosVendidos" text="" style="-fx-text-fill: rgba(255,255,255,0.75); -fx-font-size: 11px;"/>
+            </VBox>
+        </HBox>
+
+        <!-- ── Alertas ── -->
+        <VBox fx:id="panelAlertas" spacing="8"
+              style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+            <Label text="⚠️ Alertas" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+            <VBox fx:id="contenedorAlertas" spacing="6"/>
+        </VBox>
+
+        <!-- ── Gráfico ventas últimos 30 días ── -->
+        <VBox spacing="10"
+              style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+            <Label text="📈 Ventas (período seleccionado)"
+                   style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+            <LineChart fx:id="chartVentas" prefHeight="220" animated="false"
+                       style="-fx-background-color: transparent;">
+                <xAxis><CategoryAxis fx:id="xAxisVentas" label="Fecha"/></xAxis>
+                <yAxis><NumberAxis fx:id="yAxisVentas" label="COP"/></yAxis>
+            </LineChart>
+        </VBox>
+
+        <!-- ── Top productos + Ventas por hora ── -->
+        <HBox spacing="12" fillHeight="true">
+            <!-- Top productos -->
+            <VBox spacing="10" HBox.hgrow="ALWAYS"
+                  style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+                <Label text="🏆 Top Productos"
+                       style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+                <TableView fx:id="tblTopProductos" prefHeight="200" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colTopNombre"    text="Producto"   prefWidth="160"/>
+                        <TableColumn fx:id="colTopUnidades"  text="Unid."      prefWidth="55"/>
+                        <TableColumn fx:id="colTopIngreso"   text="Ingreso"    prefWidth="100"/>
+                        <TableColumn fx:id="colTopUtilidad"  text="Utilidad"   prefWidth="100"/>
+                        <TableColumn fx:id="colTopMargen"    text="Margen"     prefWidth="65"/>
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <!-- Ventas por hora -->
+            <VBox spacing="10" prefWidth="280"
+                  style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+                <Label text="🕐 Ventas por Hora (hoy)"
+                       style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+                <BarChart fx:id="chartHoras" prefHeight="200" animated="false"
+                          style="-fx-background-color: transparent;" legendVisible="false">
+                    <xAxis><CategoryAxis label="Hora"/></xAxis>
+                    <yAxis><NumberAxis label="Ventas"/></yAxis>
+                </BarChart>
+            </VBox>
+        </HBox>
+
+        <!-- ── Rendimiento por usuario ── -->
+        <VBox spacing="10"
+              style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+            <Label text="💼 Rendimiento por Usuario"
+                   style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+            <TableView fx:id="tblUsuarios" prefHeight="120">
+                <columns>
+                    <TableColumn fx:id="colUserNombre"   text="Usuario"      prefWidth="200"/>
+                    <TableColumn fx:id="colUserVentas"   text="Ventas"       prefWidth="80"/>
+                    <TableColumn fx:id="colUserTotal"    text="Total"        prefWidth="130"/>
+                    <TableColumn fx:id="colUserTicket"   text="Ticket Prom." prefWidth="130"/>
+                </columns>
+            </TableView>
+        </VBox>
+
+        <!-- ── Valoración de inventario ── -->
+        <VBox spacing="8"
+              style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+            <Label text="💰 Valoración de Inventario"
+                   style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+            <HBox spacing="40" alignment="CENTER_LEFT">
+                <VBox spacing="3">
+                    <Label text="Valor a costo" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+                    <Label fx:id="lblValorCosto" text="" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+                </VBox>
+                <VBox spacing="3">
+                    <Label text="Valor a precio venta" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+                    <Label fx:id="lblValorVenta" text="" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+                </VBox>
+                <VBox spacing="3">
+                    <Label text="Utilidad potencial" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+                    <Label fx:id="lblUtilPotencial" text="" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;"/>
+                </VBox>
+                <VBox spacing="3">
+                    <Label text="Margen promedio" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+                    <Label fx:id="lblMargenInv" text="" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #9C27B0;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <padding><Insets bottom="20"/></padding>
     </VBox>
-
-</VBox>
-
+</ScrollPane>

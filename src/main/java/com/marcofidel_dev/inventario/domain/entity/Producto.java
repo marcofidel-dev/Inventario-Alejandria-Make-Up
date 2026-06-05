@@ -83,6 +83,9 @@ public class Producto {
     @Size(max = 20)
     private String talla;
 
+    @Column(name = "created_by_user_id")
+    private Long createdByUserId;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

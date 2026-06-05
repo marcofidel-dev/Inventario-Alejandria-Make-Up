@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.marcofidel_dev.inventario.ui.controller.LoginController"
+      alignment="CENTER" spacing="20"
+      style="-fx-background-color: linear-gradient(to bottom, #C2185B, #880E4F); -fx-padding: 50;">
+
+    <!-- Logo / Title -->
+    <VBox alignment="CENTER" spacing="6">
+        <Label text="Alejandria Make-Up"
+               style="-fx-text-fill: white; -fx-font-size: 26px; -fx-font-weight: bold;
+                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 4, 0, 0, 2);"/>
+        <Label text="Sistema de Inventario"
+               style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14px;"/>
+    </VBox>
+
+    <!-- Card -->
+    <VBox spacing="16" alignment="CENTER"
+          style="-fx-background-color: white; -fx-background-radius: 14;
+                 -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0, 0, 4);"
+          maxWidth="340">
+
+        <Label text="Iniciar Sesión"
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+
+        <VBox spacing="6">
+            <Label text="Usuario" style="-fx-font-weight: 600; -fx-text-fill: #4A148C;"/>
+            <TextField fx:id="txtUsername" promptText="Ingrese su usuario"
+                       style="-fx-background-radius: 8; -fx-padding: 10; -fx-border-color: #E0E0E0;
+                              -fx-border-radius: 8; -fx-font-size: 13px;"/>
+        </VBox>
+
+        <VBox spacing="6">
+            <Label text="Contraseña" style="-fx-font-weight: 600; -fx-text-fill: #4A148C;"/>
+            <PasswordField fx:id="txtPassword" promptText="Ingrese su contraseña"
+                           onKeyPressed="#onPasswordKeyPressed"
+                           style="-fx-background-radius: 8; -fx-padding: 10; -fx-border-color: #E0E0E0;
+                                  -fx-border-radius: 8; -fx-font-size: 13px;"/>
+        </VBox>
+
+        <Label fx:id="lblError" text="" wrapText="true"
+               style="-fx-text-fill: #D32F2F; -fx-font-size: 12px;" maxWidth="280"/>
+
+        <Button text="Ingresar" onAction="#onLogin" maxWidth="Infinity"
+                style="-fx-background-color: #E91E63; -fx-text-fill: white; -fx-font-size: 14px;
+                       -fx-font-weight: 700; -fx-background-radius: 8; -fx-padding: 12;
+                       -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 6, 0, 0, 2);"/>
+    </VBox>
+
+    <Label text="v1.0 — Solo uso interno" style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 11px;"/>
+
+</VBox>

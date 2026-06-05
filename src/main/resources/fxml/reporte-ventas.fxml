@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<SplitPane dividerPositions="0.22" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.marcofidel_dev.inventario.ui.controller.ReporteVentasController"
+           style="-fx-background-color: #FCE4EC;">
+
+    <!-- ── Panel filtros ── -->
+    <ScrollPane fitToWidth="true" style="-fx-background-color: white; -fx-background-radius: 12;"
+                minWidth="200" prefWidth="220">
+        <VBox spacing="12" style="-fx-padding: 16;">
+            <Label text="Filtros" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+
+            <Label text="Desde:" style="-fx-font-weight: 600;"/>
+            <DatePicker fx:id="dpDesde" maxWidth="Infinity"/>
+
+            <Label text="Hasta:" style="-fx-font-weight: 600;"/>
+            <DatePicker fx:id="dpHasta" maxWidth="Infinity"/>
+
+            <Label text="Usuario:" style="-fx-font-weight: 600;"/>
+            <ComboBox fx:id="cbUsuario" maxWidth="Infinity" promptText="Todos"/>
+
+            <Label text="Método de pago:" style="-fx-font-weight: 600;"/>
+            <ComboBox fx:id="cbMetodo" maxWidth="Infinity" promptText="Todos"/>
+
+            <CheckBox fx:id="chkAnuladas" text="Incluir anuladas"/>
+
+            <Button text="Aplicar" onAction="#aplicarFiltros" maxWidth="Infinity"
+                    style="-fx-background-color: #880E4F; -fx-text-fill: white; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-weight: 600; -fx-cursor: hand;"/>
+            <Button text="Limpiar" onAction="#limpiarFiltros" maxWidth="Infinity"
+                    style="-fx-background-color: #E0E0E0; -fx-background-radius: 8;
+                           -fx-padding: 10; -fx-font-weight: 600; -fx-cursor: hand;"/>
+        </VBox>
+    </ScrollPane>
+
+    <!-- ── Área principal ── -->
+    <ScrollPane fitToWidth="true" style="-fx-background-color: #FCE4EC;">
+        <VBox spacing="14" style="-fx-padding: 16;">
+
+            <!-- Resumen -->
+            <HBox spacing="16" alignment="CENTER_LEFT"
+                  style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+                <Label text="📊 Reporte de Ventas"
+                       style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <VBox alignment="CENTER">
+                    <Label text="Total" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+                    <Label fx:id="lblTotal" text="" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+                </VBox>
+                <Separator orientation="VERTICAL"/>
+                <VBox alignment="CENTER">
+                    <Label text="Ventas" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+                    <Label fx:id="lblCantVentas" text="" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                </VBox>
+                <Separator orientation="VERTICAL"/>
+                <VBox alignment="CENTER">
+                    <Label text="Utilidad" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+                    <Label fx:id="lblUtilidad" text="" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;"/>
+                </VBox>
+                <Separator orientation="VERTICAL"/>
+                <VBox alignment="CENTER">
+                    <Label text="Margen" style="-fx-font-size: 11px; -fx-text-fill: #757575;"/>
+                    <Label fx:id="lblMargen" text="" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #9C27B0;"/>
+                </VBox>
+            </HBox>
+
+            <!-- Tabla ventas -->
+            <VBox spacing="8"
+                  style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+                <Label text="Detalle de Ventas (máx. 1.000)"
+                       style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+                <TableView fx:id="tblVentas" prefHeight="280" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colId"       text="#"            prefWidth="50"/>
+                        <TableColumn fx:id="colFecha"    text="Fecha"        prefWidth="130"/>
+                        <TableColumn fx:id="colCliente"  text="Cliente"      prefWidth="150"/>
+                        <TableColumn fx:id="colTotal"    text="Total"        prefWidth="100"/>
+                        <TableColumn fx:id="colMetodo"   text="Método"       prefWidth="100"/>
+                        <TableColumn fx:id="colEstado"   text="Estado"       prefWidth="90"/>
+                        <TableColumn fx:id="colUsuario"  text="Vendedor"     prefWidth="130"/>
+                        <TableColumn fx:id="colItems"    text="Items"        prefWidth="55"/>
+                    </columns>
+                </TableView>
+                <Label text="Doble clic para ver detalle de la venta."
+                       style="-fx-font-size: 11px; -fx-text-fill: #9E9E9E;"/>
+            </VBox>
+
+            <!-- Desglose por método + Exportar -->
+            <HBox spacing="14" fillHeight="true">
+                <VBox spacing="8" HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 16;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+                    <Label text="Desglose por Método de Pago"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+                    <TableView fx:id="tblDesglosePago" prefHeight="160">
+                        <columns>
+                            <TableColumn fx:id="colDPMetodo"   text="Método"   prefWidth="120"/>
+                            <TableColumn fx:id="colDPTotal"    text="Total"    prefWidth="110"/>
+                            <TableColumn fx:id="colDPVentas"   text="Ventas"   prefWidth="70"/>
+                            <TableColumn fx:id="colDPPct"      text="%"        prefWidth="70"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+
+                <VBox spacing="12" prefWidth="200" alignment="CENTER"
+                      style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);">
+                    <Label text="Exportar" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #880E4F;"/>
+                    <Button text="📄 Exportar PDF" onAction="#exportarPDF" maxWidth="Infinity"
+                            style="-fx-background-color: #D32F2F; -fx-text-fill: white; -fx-background-radius: 8;
+                                   -fx-padding: 10; -fx-font-weight: 600; -fx-cursor: hand;"/>
+                    <Button text="📊 Exportar Excel" onAction="#exportarExcel" maxWidth="Infinity"
+                            style="-fx-background-color: #388E3C; -fx-text-fill: white; -fx-background-radius: 8;
+                                   -fx-padding: 10; -fx-font-weight: 600; -fx-cursor: hand;"/>
+                    <ProgressIndicator fx:id="progressExport" prefSize="32" visible="false"/>
+                </VBox>
+            </HBox>
+
+        </VBox>
+    </ScrollPane>
+</SplitPane>

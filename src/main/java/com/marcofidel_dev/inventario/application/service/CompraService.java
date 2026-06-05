@@ -1,8 +1,13 @@
 package com.marcofidel_dev.inventario.application.service;
 
+import com.marcofidel_dev.inventario.domain.entity.AuditAction;
 import com.marcofidel_dev.inventario.domain.entity.Compra;
 import com.marcofidel_dev.inventario.domain.entity.CompraItem;
+import com.marcofidel_dev.inventario.domain.entity.Producto;
+import com.marcofidel_dev.inventario.domain.entity.Role;
 import com.marcofidel_dev.inventario.infrastructure.repository.CompraRepository;
+import com.marcofidel_dev.inventario.infrastructure.security.Audited;
+import com.marcofidel_dev.inventario.infrastructure.security.RequiresRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,53 +25,73 @@ public class CompraService {
     private final CompraRepository compraRepository;
     private final ProductoService productoService;
 
+    @RequiresRole(Role.ADMIN)
     @Transactional(readOnly = true)
     public List<Compra> listarTodos() {
         log.debug("Listando todas las compras");
         return compraRepository.findByOrderByFechaDesc();
     }
 
+    @RequiresRole(Role.ADMIN)
     @Transactional(readOnly = true)
     public Optional<Compra> buscarPorId(Long id) {
         log.debug("Buscando compra por ID: {}", id);
         return compraRepository.findById(id);
     }
 
+    @RequiresRole(Role.ADMIN)
     @Transactional(readOnly = true)
     public List<Compra> filtrarPorFechas(LocalDate fechaInicio, LocalDate fechaFin) {
         log.debug("Filtrando compras entre {} y {}", fechaInicio, fechaFin);
         return compraRepository.findByFechaBetween(fechaInicio, fechaFin);
     }
 
+    @RequiresRole(Role.ADMIN)
+    @Audited(action = AuditAction.CREATE, entity = "Compra")
     @Transactional
     public Compra guardar(Compra compra) {
         log.info("Guardando compra de proveedor: {}", compra.getProveedor());
 
-        // Si es una compra nueva, establecer fecha actual si no tiene
         if (compra.getId() == null && compra.getFecha() == null) {
             compra.setFecha(LocalDate.now());
         }
 
-        // Recalcular total
-        compra.recalcularTotal();
+        /*
+         * FIX: Hibernate 7 strict detached-entity handling.
+         *
+         * The Producto objects inside CompraItems are DETACHED entities — they were
+         * loaded in a previous transaction (when the form loaded the product list).
+         * Passing detached references through a cascade chain causes
+         * StaleObjectStateException in Hibernate 7.
+         *
+         * Solution: re-load each Producto WITHIN this transaction (making them
+         * MANAGED), increment the stock on the managed instance, and replace the
+         * detached reference on the CompraItem. Hibernate will then flush the
+         * stock change atomically when this transaction commits — no separate
+         * incrementarStock() call needed.
+         */
+        for (CompraItem item : compra.getItems()) {
+            Long productoId = item.getProducto().getId();
+            Producto managed = productoService.buscarPorId(productoId)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Producto no encontrado con ID: " + productoId));
 
-        // Guardar la compra
-        Compra compraSaved = compraRepository.save(compra);
+            managed.incrementarStock(item.getCantidad());
+            item.setProducto(managed);
 
-        // Incrementar stock de los productos
-        for (CompraItem item : compraSaved.getItems()) {
-            productoService.incrementarStock(item.getProducto().getId(), item.getCantidad());
-            log.info("Stock incrementado: Producto ID {}, cantidad: {}",
-                item.getProducto().getId(), item.getCantidad());
+            log.info("Stock a incrementar: '{}' +{} (nuevo stock: {})",
+                    managed.getNombre(), item.getCantidad(), managed.getStockActual());
         }
 
-        return compraSaved;
+        compra.recalcularTotal();
+        return compraRepository.save(compra);
     }
 
+    @RequiresRole(Role.ADMIN)
+    @Audited(action = AuditAction.DELETE, entity = "Compra")
     @Transactional
     public void eliminar(Long id) {
         log.warn("Eliminando compra con ID: {} - ADVERTENCIA: el stock ya fue incrementado", id);
         compraRepository.deleteById(id);
     }
 }
-

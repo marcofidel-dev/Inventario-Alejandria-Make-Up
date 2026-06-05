@@ -1,5 +1,6 @@
 package com.marcofidel_dev.inventario.ui.config;
 
+import com.marcofidel_dev.inventario.ui.controller.LoginController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -10,45 +11,46 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.Map;
+
 @Slf4j
 public class JavaFXApplication extends Application {
 
     private ConfigurableApplicationContext context;
-    private Parent rootNode;
+    private Parent loginRoot;
+    private LoginController loginController;
 
     @Override
     public void init() throws Exception {
         log.info("Inicializando Spring Application Context...");
 
-        // Inicializar Spring Boot sin servidor web
         String[] args = getParameters().getRaw().toArray(new String[0]);
         this.context = new SpringApplicationBuilder()
                 .sources(com.marcofidel_dev.inventario.InventarioApplication.class)
                 .run(args);
 
-        // Cargar la vista principal
         SpringFXMLLoader fxmlLoader = context.getBean(SpringFXMLLoader.class);
-        this.rootNode = fxmlLoader.load("/fxml/main.fxml");
+        Map<String, Object> fxmlData = fxmlLoader.loadWithController("/fxml/login.fxml");
+        this.loginRoot = (Parent) fxmlData.get("root");
+        this.loginController = (LoginController) fxmlData.get("controller");
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        log.info("Iniciando aplicación JavaFX...");
+    public void start(Stage primaryStage) {
+        log.info("Mostrando ventana de inicio de sesión...");
 
-        // Establecer el ícono de la aplicación
         try {
             Image icon = new Image(getClass().getResourceAsStream("/images/logo-tienda.png"));
             primaryStage.getIcons().add(icon);
-            log.info("Ícono de la aplicación cargado exitosamente");
         } catch (Exception e) {
-            log.warn("No se pudo cargar el ícono de la aplicación: {}", e.getMessage());
+            log.warn("No se pudo cargar el ícono: {}", e.getMessage());
         }
 
-        primaryStage.setTitle("Sistema de Inventario - Alejandria Make-Up");
-        primaryStage.setScene(new Scene(rootNode, 1200, 700));
-        primaryStage.setMinWidth(1000);
-        primaryStage.setMinHeight(600);
+        loginController.setLoginStage(primaryStage);
 
+        primaryStage.setTitle("Sistema de Inventario - Alejandria Make-Up");
+        primaryStage.setScene(new Scene(loginRoot, 420, 480));
+        primaryStage.setResizable(false);
         primaryStage.setOnCloseRequest(event -> {
             Platform.exit();
             System.exit(0);
@@ -64,4 +66,3 @@ public class JavaFXApplication extends Application {
         Platform.exit();
     }
 }
-
