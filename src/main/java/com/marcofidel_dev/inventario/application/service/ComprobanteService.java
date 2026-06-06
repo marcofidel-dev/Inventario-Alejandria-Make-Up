@@ -24,9 +24,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
+
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -137,7 +138,7 @@ public class ComprobanteService {
             doc.add(line("Pago: " + formatMetodoPago(sale.getPaymentMethod()), mono, FONT_SIZE, TextAlignment.LEFT));
 
             if (sale.getPaymentMethod() == PaymentMethod.EFECTIVO && efectivoRecibido != null) {
-                BigDecimal cambio = efectivoRecibido.subtract(sale.getTotal()).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal cambio = MoneyCOP.subtract(efectivoRecibido, sale.getTotal());
                 doc.add(twoCol(cols2,
                         cell("Recibido:", mono, FONT_SIZE, TextAlignment.LEFT),
                         cell(formatMoney(efectivoRecibido), mono, FONT_SIZE, TextAlignment.RIGHT)));
@@ -195,20 +196,8 @@ public class ComprobanteService {
 
     // ── Formatting helpers ───────────────────────────────────────────
 
-    /** Colombian peso format: $75.000 (period as thousands separator, no decimals). */
     private String formatMoney(BigDecimal amount) {
-        if (amount == null) return "$0";
-        long value = amount.setScale(0, RoundingMode.HALF_UP).longValue();
-        if (value < 0) return "-" + formatMoney(amount.negate());
-        String digits = String.valueOf(value);
-        StringBuilder sb = new StringBuilder();
-        int rem = digits.length() % 3;
-        if (rem > 0) sb.append(digits, 0, rem);
-        for (int i = rem; i < digits.length(); i += 3) {
-            if (sb.length() > 0) sb.append('.');
-            sb.append(digits, i, i + 3);
-        }
-        return "$" + sb;
+        return MoneyCOP.format(amount);
     }
 
     private String formatMetodoPago(PaymentMethod method) {

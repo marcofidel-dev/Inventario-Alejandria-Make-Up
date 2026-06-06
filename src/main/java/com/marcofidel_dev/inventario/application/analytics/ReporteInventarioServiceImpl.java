@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -42,13 +43,13 @@ public class ReporteInventarioServiceImpl implements ReporteInventarioService {
             BigDecimal aVenta  = toBD(row[1]);
             int totalProd      = toInt(row[2]);
             int totalUnid      = toInt(row[3]);
-            BigDecimal potencial = aVenta.subtract(aCosto).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal potencial = MoneyCOP.subtract(aVenta, aCosto);
             BigDecimal margen    = aVenta.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO
                     : potencial.divide(aVenta, 4, RoundingMode.HALF_UP)
                                .multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_UP);
             return new ValoracionInventarioDTO(
-                    aCosto.setScale(2, RoundingMode.HALF_UP),
-                    aVenta.setScale(2, RoundingMode.HALF_UP),
+                    MoneyCOP.normalize(aCosto),
+                    MoneyCOP.normalize(aVenta),
                     potencial, margen, totalProd, totalUnid);
         });
     }
@@ -60,12 +61,8 @@ public class ReporteInventarioServiceImpl implements ReporteInventarioService {
         return cache.compute("inv-por-valor", () ->
             productoRepository.findByActivoTrue().stream()
                     .map(p -> {
-                        BigDecimal aCosto = p.getCosto()
-                                .multiply(BigDecimal.valueOf(p.getStockActual()))
-                                .setScale(2, RoundingMode.HALF_UP);
-                        BigDecimal aVenta = p.getPrecioVenta()
-                                .multiply(BigDecimal.valueOf(p.getStockActual()))
-                                .setScale(2, RoundingMode.HALF_UP);
+                        BigDecimal aCosto = MoneyCOP.multiply(p.getCosto(), p.getStockActual());
+                        BigDecimal aVenta = MoneyCOP.multiply(p.getPrecioVenta(), p.getStockActual());
                         return new InventarioPorValorDTO(
                                 p.getId(), p.getNombre(), p.getCodigoProducto(),
                                 p.getStockActual(), p.getCosto(), p.getPrecioVenta(),
@@ -103,8 +100,7 @@ public class ReporteInventarioServiceImpl implements ReporteInventarioService {
         return cache.compute("margenes", () -> {
             List<MargenProductoProjection> rows = productoRepository.findMargenes();
             return rows.stream().map(r -> {
-                BigDecimal margenPesos = r.getPrecioVenta().subtract(r.getCosto())
-                        .setScale(2, RoundingMode.HALF_UP);
+                BigDecimal margenPesos = MoneyCOP.subtract(r.getPrecioVenta(), r.getCosto());
                 BigDecimal margenPct = r.getPrecioVenta().compareTo(BigDecimal.ZERO) == 0
                         ? BigDecimal.ZERO
                         : margenPesos.divide(r.getPrecioVenta(), 4, RoundingMode.HALF_UP)
@@ -128,10 +124,9 @@ public class ReporteInventarioServiceImpl implements ReporteInventarioService {
             return porTipo.entrySet().stream().map(e -> {
                 List<Producto> lista = e.getValue();
                 int unidades = lista.stream().mapToInt(Producto::getStockActual).sum();
-                BigDecimal valorCosto = lista.stream()
-                        .map(p -> p.getCosto().multiply(BigDecimal.valueOf(p.getStockActual())))
-                        .reduce(BigDecimal.ZERO, BigDecimal::add)
-                        .setScale(2, RoundingMode.HALF_UP);
+                BigDecimal valorCosto = MoneyCOP.normalize(lista.stream()
+                        .map(p -> MoneyCOP.multiply(p.getCosto(), p.getStockActual()))
+                        .reduce(MoneyCOP.ZERO, BigDecimal::add));
                 return new StockPorCategoriaDTO(e.getKey(), lista.size(), unidades, valorCosto);
             }).sorted(Comparator.comparing(StockPorCategoriaDTO::valorACosto).reversed())
                     .collect(Collectors.toList());
@@ -139,8 +134,8 @@ public class ReporteInventarioServiceImpl implements ReporteInventarioService {
     }
 
     private BigDecimal toBD(Object o) {
-        if (o == null) return BigDecimal.ZERO;
-        return new BigDecimal(o.toString()).setScale(2, RoundingMode.HALF_UP);
+        if (o == null) return MoneyCOP.ZERO;
+        return MoneyCOP.normalize(new BigDecimal(o.toString()));
     }
 
     private int toInt(Object o) {

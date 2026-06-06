@@ -139,8 +139,8 @@ class CashSessionServiceTest {
         CashSession closed = cashSessionService.cerrarSesion(1L, efectivoDeclarado, null);
 
         // expectedCash = initialCash + cashSales = 100000 + 50000 = 150000
-        assertEquals(new BigDecimal("150000.00"), closed.getExpectedCash());
-        assertEquals(new BigDecimal("150000.00"), closed.getDeclaredCash());
+        assertEquals(new BigDecimal("150000"), closed.getExpectedCash());
+        assertEquals(new BigDecimal("150000"), closed.getDeclaredCash());
         // difference = declared - expected = 150000 - 150000 = 0
         assertEquals(BigDecimal.ZERO.setScale(2), closed.getCashDifference().setScale(2));
         assertEquals(CashSessionStatus.CERRADA, closed.getStatus());
@@ -167,9 +167,9 @@ class CashSessionServiceTest {
         // Expected = 100000 + 50000 = 150000, declared = 140000 → difference = -10000 (faltante)
         CashSession closed = cashSessionService.cerrarSesion(2L, new BigDecimal("140000"), null);
 
-        assertEquals(new BigDecimal("150000.00"), closed.getExpectedCash());
+        assertEquals(new BigDecimal("150000"), closed.getExpectedCash());
         assertTrue(closed.getCashDifference().compareTo(BigDecimal.ZERO) < 0);
-        assertEquals(new BigDecimal("-10000.00"), closed.getCashDifference());
+        assertEquals(new BigDecimal("-10000"), closed.getCashDifference());
     }
 
     // ─── Resumen de caja ─────────────────────────────────────────────────
@@ -192,11 +192,11 @@ class CashSessionServiceTest {
 
         CashSessionResumenDTO resumen = cashSessionService.getResumenSesion(3L);
 
-        assertEquals(new BigDecimal("60000.00"), resumen.totalSales());
+        assertEquals(new BigDecimal("60000"), resumen.totalSales());
         assertEquals(2, resumen.saleCount());
         // expectedCash = 80000 (initial) + 25000 (efectivo) = 105000
-        assertEquals(new BigDecimal("105000.00"), resumen.expectedCash());
-        assertEquals(new BigDecimal("25000.00"), resumen.salesByMethod().get(PaymentMethod.EFECTIVO));
-        assertEquals(new BigDecimal("35000.00"), resumen.salesByMethod().get(PaymentMethod.NEQUI));
+        assertEquals(new BigDecimal("105000"), resumen.expectedCash());
+        assertEquals(new BigDecimal("25000"), resumen.salesByMethod().get(PaymentMethod.EFECTIVO));
+        assertEquals(new BigDecimal("35000"), resumen.salesByMethod().get(PaymentMethod.NEQUI));
     }
 }

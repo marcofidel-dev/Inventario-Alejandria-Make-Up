@@ -4,6 +4,8 @@ import com.marcofidel_dev.inventario.application.analytics.ExportService;
 import com.marcofidel_dev.inventario.application.analytics.ReporteInventarioService;
 import com.marcofidel_dev.inventario.application.analytics.ReporteVentasService;
 import com.marcofidel_dev.inventario.application.analytics.dto.*;
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
+import com.marcofidel_dev.inventario.ui.common.MoneyTableCell;
 import com.marcofidel_dev.inventario.application.service.DashboardService;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -105,13 +107,13 @@ public class ReporteInventarioController {
         colInvCodigo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().codigoProducto()));
         colInvStock.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().stockActual()));
         colInvCosto.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().costo()));
-        colInvCosto.setCellFactory(col -> new MoneyCell<>());
+        colInvCosto.setCellFactory(MoneyTableCell.factory());
         colInvPrecio.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().precioVenta()));
-        colInvPrecio.setCellFactory(col -> new MoneyCell<>());
+        colInvPrecio.setCellFactory(MoneyTableCell.factory());
         colInvValorC.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().valorACosto()));
-        colInvValorC.setCellFactory(col -> new MoneyCell<>());
+        colInvValorC.setCellFactory(MoneyTableCell.factory());
         colInvValorV.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().valorAPrecioVenta()));
-        colInvValorV.setCellFactory(col -> new MoneyCell<>());
+        colInvValorV.setCellFactory(MoneyTableCell.factory());
 
         colSCNombre.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().nombre()));
         colSCCodigo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().codigoProducto()));
@@ -131,11 +133,11 @@ public class ReporteInventarioController {
         colMgNombre.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().nombre()));
         colMgCodigo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().codigoProducto()));
         colMgCosto.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().costo()));
-        colMgCosto.setCellFactory(col -> new MoneyCell<>());
+        colMgCosto.setCellFactory(MoneyTableCell.factory());
         colMgPrecio.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().precioVenta()));
-        colMgPrecio.setCellFactory(col -> new MoneyCell<>());
+        colMgPrecio.setCellFactory(MoneyTableCell.factory());
         colMgPesos.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().margenPesos()));
-        colMgPesos.setCellFactory(col -> new MoneyCell<>());
+        colMgPesos.setCellFactory(MoneyTableCell.factory());
         colMgPct.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().margenPorcentaje()));
         colMgPct.setCellFactory(col -> new PctCell<>());
     }
@@ -148,7 +150,7 @@ public class ReporteInventarioController {
         cNombre.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().nombre()));
         cUnid.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().unidadesVendidas()));
         cIngreso.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().ingreso()));
-        cIngreso.setCellFactory(col -> new MoneyCell<>());
+        cIngreso.setCellFactory(MoneyTableCell.factory());
         cPct.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().porcentajeAcumulado()));
         cPct.setCellFactory(col -> new PctCell<>());
     }
@@ -223,41 +225,13 @@ public class ReporteInventarioController {
     }
 
     private String cop(BigDecimal v) {
-        if (v == null) return "$0";
-        long val = v.setScale(0, RoundingMode.HALF_UP).longValue();
-        if (val < 0) return "-" + cop(v.negate());
-        String d = String.valueOf(val);
-        StringBuilder sb = new StringBuilder();
-        int rem = d.length() % 3;
-        if (rem > 0) sb.append(d, 0, rem);
-        for (int i = rem; i < d.length(); i += 3) {
-            if (!sb.isEmpty()) sb.append('.');
-            sb.append(d, i, i + 3);
-        }
-        return "$" + sb;
-    }
-
-    private static class MoneyCell<T> extends TableCell<T, BigDecimal> {
-        @Override protected void updateItem(BigDecimal v, boolean empty) {
-            super.updateItem(v, empty);
-            if (empty || v == null) { setText(null); return; }
-            long val = v.setScale(0, RoundingMode.HALF_UP).longValue();
-            String d = String.valueOf(Math.abs(val));
-            StringBuilder sb = new StringBuilder();
-            int rem = d.length() % 3;
-            if (rem > 0) sb.append(d, 0, rem);
-            for (int i = rem; i < d.length(); i += 3) {
-                if (!sb.isEmpty()) sb.append('.');
-                sb.append(d, i, i + 3);
-            }
-            setText((val < 0 ? "-$" : "$") + sb);
-        }
+        return MoneyCOP.format(v);
     }
 
     private static class PctCell<T> extends TableCell<T, BigDecimal> {
         @Override protected void updateItem(BigDecimal v, boolean empty) {
             super.updateItem(v, empty);
-            setText(empty || v == null ? null : v.setScale(1, RoundingMode.HALF_UP) + "%");
+            setText(empty || v == null ? null : v.setScale(1, java.math.RoundingMode.HALF_UP) + "%");
         }
     }
 }

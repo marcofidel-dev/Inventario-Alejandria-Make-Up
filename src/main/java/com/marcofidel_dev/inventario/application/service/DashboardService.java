@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -185,14 +186,14 @@ public class DashboardService {
             BigDecimal aVenta   = toBD(row[1]);
             int totalProd       = toInt(row[2]);
             int totalUnid       = toInt(row[3]);
-            BigDecimal potencial = aVenta.subtract(aCosto).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal potencial = MoneyCOP.subtract(aVenta, aCosto);
             BigDecimal margen   = aCosto.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO
                     : potencial.divide(aVenta, 4, RoundingMode.HALF_UP)
                                .multiply(BigDecimal.valueOf(100))
                                .setScale(2, RoundingMode.HALF_UP);
             return new ValoracionInventarioDTO(
-                    aCosto.setScale(2, RoundingMode.HALF_UP),
-                    aVenta.setScale(2, RoundingMode.HALF_UP),
+                    MoneyCOP.normalize(aCosto),
+                    MoneyCOP.normalize(aVenta),
                     potencial,
                     margen,
                     totalProd,
@@ -287,12 +288,12 @@ public class DashboardService {
     }
 
     private BigDecimal safe(BigDecimal v) {
-        return v == null ? BigDecimal.ZERO : v.setScale(2, RoundingMode.HALF_UP);
+        return MoneyCOP.normalize(v);
     }
 
     private BigDecimal toBD(Object o) {
-        if (o == null) return BigDecimal.ZERO;
-        return new BigDecimal(o.toString()).setScale(2, RoundingMode.HALF_UP);
+        if (o == null) return MoneyCOP.ZERO;
+        return MoneyCOP.normalize(new BigDecimal(o.toString()));
     }
 
     private int toInt(Object o) {

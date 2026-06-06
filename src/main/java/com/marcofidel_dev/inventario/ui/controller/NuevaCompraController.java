@@ -2,6 +2,9 @@ package com.marcofidel_dev.inventario.ui.controller;
 
 import com.marcofidel_dev.inventario.application.service.CompraService;
 import com.marcofidel_dev.inventario.application.service.ProductoService;
+import com.marcofidel_dev.inventario.shared.money.InvalidMoneyFormatException;
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
+import com.marcofidel_dev.inventario.ui.common.MoneyTableCell;
 import com.marcofidel_dev.inventario.domain.entity.Compra;
 import com.marcofidel_dev.inventario.domain.entity.CompraItem;
 import com.marcofidel_dev.inventario.domain.entity.Producto;
@@ -15,11 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Component
@@ -75,11 +75,7 @@ public class NuevaCompraController {
     }
 
     private void configurarTabla() {
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
-        symbols.setDecimalSeparator('.');
-        DecimalFormat df = new DecimalFormat("#0.000", symbols);
-
-        colProducto.setCellValueFactory(cellData -> 
+        colProducto.setCellValueFactory(cellData ->
             new javafx.beans.property.SimpleStringProperty(
                 cellData.getValue().getProducto().getNombre()
             )
@@ -87,31 +83,17 @@ public class NuevaCompraController {
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
 
         colCostoUnitario.setCellValueFactory(new PropertyValueFactory<>("costoUnitario"));
-        colCostoUnitario.setCellFactory(col -> new TableCell<CompraItem, BigDecimal>() {
-            @Override
-            protected void updateItem(BigDecimal item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(df.format(item));
-                }
-            }
-        });
+        colCostoUnitario.setCellFactory(MoneyTableCell.factory());
 
         colSubtotal.setCellFactory(col -> new TableCell<CompraItem, BigDecimal>() {
             @Override
             protected void updateItem(BigDecimal item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setText(null);
-                } else {
-                    CompraItem compraItem = getTableRow().getItem();
-                    if (compraItem != null) {
-                        BigDecimal subtotal = compraItem.getCostoUnitario()
-                                .multiply(BigDecimal.valueOf(compraItem.getCantidad()));
-                        setText(df.format(subtotal));
-                    }
+                if (empty) { setText(null); return; }
+                CompraItem compraItem = getTableRow().getItem();
+                if (compraItem != null) {
+                    setText(MoneyCOP.format(MoneyCOP.multiply(
+                            compraItem.getCostoUnitario(), compraItem.getCantidad())));
                 }
             }
         });
@@ -183,8 +165,8 @@ public class NuevaCompraController {
                     Producto p = new Producto();
                     p.setNombre(txtNombre.getText().trim());
                     p.setTipo(cmbTipo.getValue());
-                    p.setCosto(new BigDecimal(txtCosto.getText().replace(',', '.')));
-                    p.setPrecioVenta(new BigDecimal(txtPrecio.getText().replace(',', '.')));
+                    p.setCosto(MoneyCOP.parse(txtCosto.getText()));
+                    p.setPrecioVenta(MoneyCOP.parse(txtPrecio.getText()));
                     p.setStockActual(0);
                     p.setStockMinimo(0);
                     p.setActivo(true);
@@ -233,7 +215,7 @@ public class NuevaCompraController {
 
             Producto producto = cmbProducto.getValue();
             Integer cantidad = Integer.parseInt(tfCantidad.getText());
-            BigDecimal costoUnitario = new BigDecimal(tfCostoUnitario.getText());
+            BigDecimal costoUnitario = MoneyCOP.parse(tfCostoUnitario.getText());
 
             if (cantidad <= 0) {
                 mostrarAdvertencia("La cantidad debe ser mayor a 0");
@@ -293,10 +275,7 @@ public class NuevaCompraController {
     }
 
     private void actualizarTotal() {
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
-        symbols.setDecimalSeparator('.');
-        DecimalFormat df = new DecimalFormat("#0.000", symbols);
-        lblTotal.setText("Total: $ " + df.format(compra.getTotalCosto()));
+        lblTotal.setText("Total: " + MoneyCOP.format(compra.getTotalCosto()));
     }
 
     private void limpiarCamposProducto() {

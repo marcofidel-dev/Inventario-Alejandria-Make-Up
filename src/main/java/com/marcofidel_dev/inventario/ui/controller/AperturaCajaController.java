@@ -2,6 +2,9 @@ package com.marcofidel_dev.inventario.ui.controller;
 
 import com.marcofidel_dev.inventario.application.service.CashSessionService;
 import com.marcofidel_dev.inventario.infrastructure.security.SessionContext;
+import com.marcofidel_dev.inventario.shared.money.InvalidMoneyFormatException;
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
+import java.math.BigDecimal;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -58,12 +60,8 @@ public class AperturaCajaController {
         }
         BigDecimal efectivo;
         try {
-            efectivo = new BigDecimal(texto.replace(",", "."));
-            if (efectivo.compareTo(BigDecimal.ZERO) < 0) {
-                lblError.setText("El efectivo inicial no puede ser negativo.");
-                return;
-            }
-        } catch (NumberFormatException e) {
+            efectivo = MoneyCOP.parse(texto);
+        } catch (InvalidMoneyFormatException e) {
             lblError.setText("Monto inválido. Usa solo números (ej: 100000).");
             return;
         }

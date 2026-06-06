@@ -2,6 +2,8 @@ package com.marcofidel_dev.inventario.ui.controller;
 
 import com.marcofidel_dev.inventario.application.service.CashSessionService;
 import com.marcofidel_dev.inventario.application.dto.CashSessionResumenDTO;
+import com.marcofidel_dev.inventario.shared.money.InvalidMoneyFormatException;
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import com.marcofidel_dev.inventario.domain.entity.PaymentMethod;
 import com.marcofidel_dev.inventario.ui.common.FormatUtils;
 import javafx.fxml.FXML;
@@ -16,7 +18,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
 
 @Component
@@ -83,7 +84,7 @@ public class CierreCajaController {
             efectivoEsperado = r.expectedCash();
             lblEfectivoEsperado.setText(FormatUtils.money(efectivoEsperado));
 
-            txtEfectivoDeclarado.setText(efectivoEsperado.setScale(0, RoundingMode.HALF_UP).toPlainString());
+            txtEfectivoDeclarado.setText(MoneyCOP.formatPlain(efectivoEsperado));
             recalcularDiferencia();
             txtEfectivoDeclarado.requestFocus();
             txtEfectivoDeclarado.selectAll();
@@ -97,8 +98,8 @@ public class CierreCajaController {
     private void recalcularDiferencia() {
         if (efectivoEsperado == null) return;
         try {
-            BigDecimal declarado = new BigDecimal(txtEfectivoDeclarado.getText().trim().replace(",", "."));
-            BigDecimal diff = declarado.subtract(efectivoEsperado).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal declarado = MoneyCOP.parse(txtEfectivoDeclarado.getText().trim());
+            BigDecimal diff = MoneyCOP.subtract(declarado, efectivoEsperado);
             lblDiferencia.setText(FormatUtils.money(diff));
 
             if (diff.compareTo(BigDecimal.ZERO) > 0) {
@@ -114,7 +115,7 @@ public class CierreCajaController {
                 lblDiferenciaTag.setText("Cuadre exacto");
                 lblDiferenciaTag.setStyle("-fx-text-fill: #555; -fx-font-style: italic;");
             }
-        } catch (NumberFormatException e) {
+        } catch (InvalidMoneyFormatException e) {
             lblDiferencia.setText("—");
             lblDiferenciaTag.setText("");
         }
@@ -123,16 +124,16 @@ public class CierreCajaController {
     @FXML
     private void cerrarCaja() {
         lblError.setText("");
-        String texto = txtEfectivoDeclarado.getText().trim().replace(",", ".");
+        String texto = txtEfectivoDeclarado.getText().trim();
         if (texto.isBlank()) {
             lblError.setText("Ingresa el efectivo declarado.");
             return;
         }
         BigDecimal declarado;
         try {
-            declarado = new BigDecimal(texto);
-        } catch (NumberFormatException e) {
-            lblError.setText("Monto inválido.");
+            declarado = MoneyCOP.parse(texto);
+        } catch (InvalidMoneyFormatException e) {
+            lblError.setText("Monto inválido. Usa solo números.");
             return;
         }
         try {

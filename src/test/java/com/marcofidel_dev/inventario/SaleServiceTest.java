@@ -230,7 +230,7 @@ class SaleServiceTest {
             s.setId(3L);
             // Verify price snapshot
             SaleItem item = s.getItems().get(0);
-            assertEquals(new BigDecimal("14000.00"), item.getUnitPrice());
+            assertEquals(new BigDecimal("14000"), item.getUnitPrice());
             return s;
         });
 

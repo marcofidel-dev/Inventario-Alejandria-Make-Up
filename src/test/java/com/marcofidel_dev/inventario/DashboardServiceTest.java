@@ -62,7 +62,7 @@ class DashboardServiceTest {
         KPIsDelDiaDTO result = dashboardService.getKPIsDelDia();
 
         assertNotNull(result);
-        assertEquals(new BigDecimal("150000.00"), result.totalVendido());
+        assertEquals(new BigDecimal("150000"), result.totalVendido());
         assertEquals(5, result.cantidadVentas());
         assertEquals("Alejandrina", result.mejorVendedor());
         // Porcentaje vs ayer: (150000 - 100000) / 100000 * 100 = 50%
@@ -99,7 +99,7 @@ class DashboardServiceTest {
                 java.time.LocalDate.now().minusDays(29), java.time.LocalDate.now());
 
         assertNotNull(result);
-        assertEquals(new BigDecimal("200000.00"), result.totalVendido());
+        assertEquals(new BigDecimal("200000"), result.totalVendido());
         // margen = 80000 / 200000 * 100 = 40.00%
         assertEquals(new BigDecimal("40.00"), result.margenPorcentaje());
     }
@@ -134,10 +134,10 @@ class DashboardServiceTest {
 
         ValoracionInventarioDTO result = dashboardService.getValoracionInventario();
 
-        assertEquals(new BigDecimal("500000.00"), result.valorACosto());
-        assertEquals(new BigDecimal("800000.00"), result.valorAPrecioVenta());
+        assertEquals(new BigDecimal("500000"), result.valorACosto());
+        assertEquals(new BigDecimal("800000"), result.valorAPrecioVenta());
         // utilidad potencial = 800000 - 500000 = 300000
-        assertEquals(new BigDecimal("300000.00"), result.utilidadPotencial());
+        assertEquals(new BigDecimal("300000"), result.utilidadPotencial());
         // margen = 300000 / 800000 * 100 = 37.50%
         assertEquals(new BigDecimal("37.50"), result.margenPromedio());
         assertEquals(20, result.totalProductos());

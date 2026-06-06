@@ -7,8 +7,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
+
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 /** In-memory cart item. Not persisted — if the app crashes, the cart is intentionally lost. */
 public class CarritoItem {
@@ -21,7 +22,7 @@ public class CarritoItem {
     public CarritoItem(Producto producto, int cantidad, BigDecimal precioUnitario) {
         this.producto = producto;
         this.cantidad = new SimpleIntegerProperty(cantidad);
-        this.precioUnitario = new SimpleObjectProperty<>(precioUnitario.setScale(2, RoundingMode.HALF_UP));
+        this.precioUnitario = new SimpleObjectProperty<>(MoneyCOP.normalize(precioUnitario));
 
         this.subtotal = new ObjectBinding<>() {
             {
@@ -29,9 +30,9 @@ public class CarritoItem {
             }
             @Override
             protected BigDecimal computeValue() {
-                return CarritoItem.this.precioUnitario.get()
-                        .multiply(BigDecimal.valueOf(CarritoItem.this.cantidad.get()))
-                        .setScale(2, RoundingMode.HALF_UP);
+                return MoneyCOP.multiply(
+                        CarritoItem.this.precioUnitario.get(),
+                        CarritoItem.this.cantidad.get());
             }
         };
     }

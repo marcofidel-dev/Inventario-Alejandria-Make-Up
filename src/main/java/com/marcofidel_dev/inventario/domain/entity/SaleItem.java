@@ -1,12 +1,13 @@
 package com.marcofidel_dev.inventario.domain.entity;
 
+import com.marcofidel_dev.inventario.infrastructure.persistence.MoneyConverter;
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @Entity
 @Table(name = "sale_item")
@@ -36,22 +37,25 @@ public class SaleItem {
 
     // Price snapshot at the moment of sale — never query producto.precioVenta for historical reports
     @NotNull
-    @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
+    @Convert(converter = MoneyConverter.class)
+    @Column(name = "unit_price", nullable = false, precision = 10, scale = 0)
     private BigDecimal unitPrice;
 
     // Cost snapshot for profit margin calculations — key for accurate margin reports
     @NotNull
-    @Column(name = "unit_cost", nullable = false, precision = 10, scale = 2)
+    @Convert(converter = MoneyConverter.class)
+    @Column(name = "unit_cost", nullable = false, precision = 10, scale = 0)
     private BigDecimal unitCost;
 
-    @Column(precision = 10, scale = 2)
+    @Convert(converter = MoneyConverter.class)
+    @Column(precision = 10, scale = 0)
     private BigDecimal subtotal;
 
     public SaleItem(Producto producto, Integer quantity, BigDecimal unitPrice, BigDecimal unitCost) {
         this.producto = producto;
         this.quantity = quantity;
-        this.unitPrice = unitPrice;
-        this.unitCost = unitCost;
-        this.subtotal = unitPrice.multiply(BigDecimal.valueOf(quantity)).setScale(2, RoundingMode.HALF_UP);
+        this.unitPrice = MoneyCOP.normalize(unitPrice);
+        this.unitCost = MoneyCOP.normalize(unitCost);
+        this.subtotal = MoneyCOP.multiply(unitPrice, quantity);
     }
 }

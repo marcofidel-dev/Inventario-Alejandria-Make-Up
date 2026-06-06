@@ -1,5 +1,7 @@
 package com.marcofidel_dev.inventario.domain.entity;
 
+import com.marcofidel_dev.inventario.infrastructure.persistence.MoneyConverter;
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -9,7 +11,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,8 +36,9 @@ public class Compra {
 
     @NotNull
     @DecimalMin(value = "0.0", inclusive = true)
-    @Column(name = "total_costo", nullable = false, precision = 10, scale = 3)
-    private BigDecimal totalCosto = BigDecimal.ZERO;
+    @Convert(converter = MoneyConverter.class)
+    @Column(name = "total_costo", nullable = false, precision = 10, scale = 0)
+    private BigDecimal totalCosto = MoneyCOP.ZERO;
 
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<CompraItem> items = new ArrayList<>();
@@ -67,10 +69,8 @@ public class Compra {
 
     public void recalcularTotal() {
         this.totalCosto = items.stream()
-                .map(item -> item.getCostoUnitario().multiply(BigDecimal.valueOf(item.getCantidad()))
-                    .setScale(3, RoundingMode.HALF_UP))
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .setScale(3, RoundingMode.HALF_UP);
+                .map(item -> MoneyCOP.multiply(item.getCostoUnitario(), item.getCantidad()))
+                .reduce(MoneyCOP.ZERO, MoneyCOP::add);
     }
 }
 

@@ -1,5 +1,6 @@
 package com.marcofidel_dev.inventario.domain.entity;
 
+import com.marcofidel_dev.inventario.infrastructure.persistence.MoneyConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -42,12 +43,14 @@ public class Producto {
 
     @NotNull
     @DecimalMin(value = "0.0", inclusive = true)
-    @Column(nullable = false, precision = 10, scale = 3)
+    @Convert(converter = MoneyConverter.class)
+    @Column(nullable = false, precision = 10, scale = 0)
     private BigDecimal costo;
 
     @NotNull
     @DecimalMin(value = "0.0", inclusive = true)
-    @Column(name = "precio_venta", nullable = false, precision = 10, scale = 3)
+    @Convert(converter = MoneyConverter.class)
+    @Column(name = "precio_venta", nullable = false, precision = 10, scale = 0)
     private BigDecimal precioVenta;
 
     @NotNull
@@ -133,7 +136,7 @@ public class Producto {
         }
 
         if (precioVenta != null) {
-            sb.append(" | Precio: $").append(precioVenta);
+            sb.append(" | Precio: ").append(com.marcofidel_dev.inventario.shared.money.MoneyCOP.format(precioVenta));
         }
 
         if (stockActual != null) {

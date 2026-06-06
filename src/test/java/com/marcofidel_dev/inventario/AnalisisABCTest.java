@@ -65,7 +65,7 @@ class AnalisisABCTest {
         AnalisisABCDTO result = service.getAnalisisABC(LocalDate.now().minusDays(29), LocalDate.now());
 
         assertNotNull(result);
-        assertEquals(new BigDecimal("100.00"), result.totalIngresos());
+        assertEquals(new BigDecimal("100"), result.totalIngresos());
 
         assertEquals(2, result.categoriaA().size(), "Categoría A debe tener 2 productos");
         assertEquals(2, result.categoriaB().size(), "Categoría B debe tener 2 productos");

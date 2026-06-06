@@ -2,6 +2,7 @@ package com.marcofidel_dev.inventario.ui.controller;
 
 import com.marcofidel_dev.inventario.application.service.CompraService;
 import com.marcofidel_dev.inventario.domain.entity.Compra;
+import com.marcofidel_dev.inventario.ui.common.MoneyTableCell;
 import com.marcofidel_dev.inventario.ui.config.SpringFXMLLoader;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -17,11 +18,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 
 @Component
 @RequiredArgsConstructor
@@ -56,28 +54,12 @@ public class ComprasController {
     }
 
     private void configurarTabla() {
-        // Configurar formateador con punto como separador
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
-        symbols.setDecimalSeparator('.');
-        DecimalFormat df = new DecimalFormat("#0.000", symbols);
-
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedor"));
         colFecha.setCellValueFactory(new PropertyValueFactory<>("fecha"));
 
-        // Formatear columna de total con 3 decimales
         colTotal.setCellValueFactory(new PropertyValueFactory<>("totalCosto"));
-        colTotal.setCellFactory(col -> new TableCell<Compra, BigDecimal>() {
-            @Override
-            protected void updateItem(BigDecimal item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(df.format(item));
-                }
-            }
-        });
+        colTotal.setCellFactory(MoneyTableCell.factory());
     }
 
     @FXML

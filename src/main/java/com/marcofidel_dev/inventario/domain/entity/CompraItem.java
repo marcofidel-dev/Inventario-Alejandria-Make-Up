@@ -1,5 +1,6 @@
 package com.marcofidel_dev.inventario.domain.entity;
 
+import com.marcofidel_dev.inventario.infrastructure.persistence.MoneyConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -34,7 +35,8 @@ public class CompraItem {
 
     @NotNull
     @DecimalMin(value = "0.0", inclusive = true)
-    @Column(name = "costo_unitario", nullable = false, precision = 10, scale = 3)
+    @Convert(converter = MoneyConverter.class)
+    @Column(name = "costo_unitario", nullable = false, precision = 10, scale = 0)
     private BigDecimal costoUnitario;
 
     // Constructor conveniente

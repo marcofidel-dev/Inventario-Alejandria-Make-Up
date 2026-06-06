@@ -63,9 +63,9 @@ class ReporteVentasServiceTest {
         FiltroReporteDTO filtro = FiltroReporteDTO.ultimos30Dias();
         ReporteVentasPeriodoDTO result = service.generarReporte(filtro);
 
-        assertEquals(new BigDecimal("300000.00"), result.totalVendido());
+        assertEquals(new BigDecimal("300000"), result.totalVendido());
         assertEquals(15, result.cantidadVentas());
-        assertEquals(new BigDecimal("90000.00"), result.utilidadTotal());
+        assertEquals(new BigDecimal("90000"), result.utilidadTotal());
         // margen = 90000 / 300000 * 100 = 30%
         assertEquals(new BigDecimal("30.00"), result.margenPorcentaje());
     }

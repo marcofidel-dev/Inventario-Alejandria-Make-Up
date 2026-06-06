@@ -4,6 +4,7 @@ import com.marcofidel_dev.inventario.application.analytics.ExportService;
 import com.marcofidel_dev.inventario.application.analytics.ReporteClientesService;
 import com.marcofidel_dev.inventario.application.analytics.dto.*;
 import com.marcofidel_dev.inventario.application.service.CustomerService;
+import com.marcofidel_dev.inventario.ui.common.MoneyTableCell;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -75,7 +75,7 @@ public class ReporteClientesController {
         colTCPhone.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().phone()));
         colTCCompras.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().cantidadCompras()));
         colTCTotal.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().totalComprado()));
-        colTCTotal.setCellFactory(col -> new MoneyCell<>());
+        colTCTotal.setCellFactory(MoneyTableCell.factory());
         colTCUltima.setCellValueFactory(c -> new SimpleStringProperty(
                 c.getValue().ultimaCompra() != null ? c.getValue().ultimaCompra().format(DT_FMT) : "—"));
 
@@ -85,7 +85,7 @@ public class ReporteClientesController {
                 c.getValue().ultimaCompra() != null ? c.getValue().ultimaCompra().toString() : "Nunca"));
         colCIDias.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().diasSinComprar()));
         colCIHistorico.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().totalHistorico()));
-        colCIHistorico.setCellFactory(col -> new MoneyCell<>());
+        colCIHistorico.setCellFactory(MoneyTableCell.factory());
     }
 
     @FXML
@@ -141,20 +141,4 @@ public class ReporteClientesController {
         });
     }
 
-    private static class MoneyCell<T> extends TableCell<T, BigDecimal> {
-        @Override protected void updateItem(BigDecimal v, boolean empty) {
-            super.updateItem(v, empty);
-            if (empty || v == null) { setText(null); return; }
-            long val = v.setScale(0, RoundingMode.HALF_UP).longValue();
-            String d = String.valueOf(Math.abs(val));
-            StringBuilder sb = new StringBuilder();
-            int rem = d.length() % 3;
-            if (rem > 0) sb.append(d, 0, rem);
-            for (int i = rem; i < d.length(); i += 3) {
-                if (!sb.isEmpty()) sb.append('.');
-                sb.append(d, i, i + 3);
-            }
-            setText((val < 0 ? "-$" : "$") + sb);
-        }
-    }
 }

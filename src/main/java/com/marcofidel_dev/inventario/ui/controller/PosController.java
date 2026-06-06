@@ -8,6 +8,7 @@ import com.marcofidel_dev.inventario.domain.entity.Customer;
 import com.marcofidel_dev.inventario.domain.entity.PaymentMethod;
 import com.marcofidel_dev.inventario.domain.entity.Producto;
 import com.marcofidel_dev.inventario.domain.entity.Sale;
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import com.marcofidel_dev.inventario.ui.common.FormatUtils;
 import com.marcofidel_dev.inventario.ui.config.SpringFXMLLoader;
 import com.marcofidel_dev.inventario.ui.model.CarritoItem;
@@ -357,9 +358,8 @@ public class PosController {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal descPct = parseDescuento();
-        BigDecimal descMonto = subtotal.multiply(descPct)
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        BigDecimal total = subtotal.subtract(descMonto).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal descMonto = MoneyCOP.applyPercentage(subtotal, descPct);
+        BigDecimal total = MoneyCOP.subtract(subtotal, descMonto);
 
         lblSubtotal.setText(FormatUtils.money(subtotal));
         lblDescuentoMonto.setText("-" + FormatUtils.money(descMonto));
@@ -487,7 +487,7 @@ public class PosController {
     private void mostrarResultadoVenta(Sale sale, PaymentMethod metodo, BigDecimal efectivoRecibido) {
         String cuerpo = "Total: " + FormatUtils.money(sale.getTotal());
         if (metodo == PaymentMethod.EFECTIVO && efectivoRecibido != null) {
-            BigDecimal cambio = efectivoRecibido.subtract(sale.getTotal()).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal cambio = MoneyCOP.subtract(efectivoRecibido, sale.getTotal());
             if (cambio.compareTo(BigDecimal.ZERO) >= 0) {
                 cuerpo += "\nCambio: " + FormatUtils.money(cambio);
             }
@@ -556,9 +556,8 @@ public class PosController {
     private BigDecimal calcularTotal() {
         BigDecimal sub = carrito.stream().map(CarritoItem::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal desc = sub.multiply(parseDescuento())
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        return sub.subtract(desc).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal desc = MoneyCOP.applyPercentage(sub, parseDescuento());
+        return MoneyCOP.subtract(sub, desc);
     }
 
     private BigDecimal parseDescuento() {

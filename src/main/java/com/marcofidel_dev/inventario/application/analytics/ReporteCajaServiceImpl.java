@@ -14,8 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -72,10 +72,9 @@ public class ReporteCajaServiceImpl implements ReporteCajaService {
                 s.getItems().size()
         )).collect(Collectors.toList());
 
-        BigDecimal totalVentas = salesRaw.stream()
+        BigDecimal totalVentas = MoneyCOP.normalize(salesRaw.stream()
                 .filter(s -> s.getStatus().name().equals("COMPLETADA"))
-                .map(Sale::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add)
-                .setScale(2, RoundingMode.HALF_UP);
+                .map(Sale::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add));
 
         return new SesionCajaDetalleDTO(resumen, ventas, totalVentas, ventas.size());
     }
@@ -142,6 +141,6 @@ public class ReporteCajaServiceImpl implements ReporteCajaService {
     }
 
     private BigDecimal safe(BigDecimal v) {
-        return v == null ? BigDecimal.ZERO : v.setScale(2, RoundingMode.HALF_UP);
+        return MoneyCOP.normalize(v);
     }
 }

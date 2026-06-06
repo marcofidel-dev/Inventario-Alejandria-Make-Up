@@ -7,8 +7,8 @@ import com.marcofidel_dev.inventario.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 
 @Component
@@ -67,12 +67,11 @@ public class SaleMapper {
                 .map(this::toItemAdminViewDTO)
                 .toList();
 
-        BigDecimal totalCost = items.stream()
-                .map(i -> i.unitCost().multiply(BigDecimal.valueOf(i.quantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalCost = MoneyCOP.normalize(items.stream()
+                .map(i -> MoneyCOP.multiply(i.unitCost(), i.quantity()))
+                .reduce(MoneyCOP.ZERO, BigDecimal::add));
 
-        BigDecimal totalProfit = sale.getTotal().subtract(totalCost).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalProfit = MoneyCOP.subtract(sale.getTotal(), totalCost);
 
         return new SaleDetalleAdminDTO(
                 sale.getId(),
@@ -104,9 +103,9 @@ public class SaleMapper {
     }
 
     private SaleItemAdminViewDTO toItemAdminViewDTO(SaleItem item) {
-        BigDecimal profit = item.getUnitPrice().subtract(item.getUnitCost())
-                .multiply(BigDecimal.valueOf(item.getQuantity()))
-                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal profit = MoneyCOP.multiply(
+                MoneyCOP.subtract(item.getUnitPrice(), item.getUnitCost()),
+                item.getQuantity());
         return new SaleItemAdminViewDTO(
                 item.getProducto().getNombre(),
                 item.getProducto().getCodigoProducto(),

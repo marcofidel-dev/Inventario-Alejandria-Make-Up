@@ -1,5 +1,6 @@
 package com.marcofidel_dev.inventario.domain.entity;
 
+import com.marcofidel_dev.inventario.infrastructure.persistence.MoneyConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -37,17 +38,20 @@ public class Sale {
     private LocalDateTime saleDate;
 
     @NotNull
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Convert(converter = MoneyConverter.class)
+    @Column(nullable = false, precision = 10, scale = 0)
     private BigDecimal subtotal;
 
     @Column(name = "discount_percent", precision = 5, scale = 2)
     private BigDecimal discountPercent = BigDecimal.ZERO;
 
-    @Column(name = "discount_amount", precision = 10, scale = 2)
+    @Convert(converter = MoneyConverter.class)
+    @Column(name = "discount_amount", precision = 10, scale = 0)
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @NotNull
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Convert(converter = MoneyConverter.class)
+    @Column(nullable = false, precision = 10, scale = 0)
     private BigDecimal total;
 
     @NotNull

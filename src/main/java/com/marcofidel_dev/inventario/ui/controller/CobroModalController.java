@@ -1,6 +1,8 @@
 package com.marcofidel_dev.inventario.ui.controller;
 
 import com.marcofidel_dev.inventario.domain.entity.PaymentMethod;
+import com.marcofidel_dev.inventario.shared.money.InvalidMoneyFormatException;
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import com.marcofidel_dev.inventario.ui.common.FormatUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -13,7 +15,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.function.Consumer;
 
 @Component
@@ -55,7 +56,7 @@ public class CobroModalController {
         pnlEfectivo.setManaged(esEfectivo);
 
         if (esEfectivo) {
-            txtEfectivoRecibido.setText(total.setScale(0, RoundingMode.CEILING).toPlainString());
+            txtEfectivoRecibido.setText(MoneyCOP.formatPlain(MoneyCOP.normalize(total)));
             recalcularCambio();
             txtEfectivoRecibido.selectAll();
             txtEfectivoRecibido.requestFocus();
@@ -67,16 +68,16 @@ public class CobroModalController {
     @FXML
     private void recalcularCambio() {
         try {
-            BigDecimal recibido = new BigDecimal(txtEfectivoRecibido.getText().trim());
-            BigDecimal cambio = recibido.subtract(totalAmount).setScale(2, RoundingMode.HALF_UP);
-            boolean suficiente = recibido.compareTo(totalAmount) >= 0;
+            BigDecimal recibido = MoneyCOP.parse(txtEfectivoRecibido.getText().trim());
+            BigDecimal cambio = MoneyCOP.subtract(recibido, totalAmount);
+            boolean suficiente = recibido.compareTo(MoneyCOP.normalize(totalAmount)) >= 0;
 
             lblCambio.setText(suficiente ? FormatUtils.money(cambio) : "Insuficiente");
             lblCambio.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: "
                     + (suficiente ? "#4CAF50" : "#D32F2F") + ";");
             btnConfirmar.setDisable(!suficiente);
             lblError.setText("");
-        } catch (NumberFormatException e) {
+        } catch (InvalidMoneyFormatException e) {
             lblCambio.setText("—");
             btnConfirmar.setDisable(true);
         }
@@ -87,12 +88,12 @@ public class CobroModalController {
         BigDecimal efectivoRecibido = null;
         if (metodoPago == PaymentMethod.EFECTIVO) {
             try {
-                efectivoRecibido = new BigDecimal(txtEfectivoRecibido.getText().trim());
-                if (efectivoRecibido.compareTo(totalAmount) < 0) {
+                efectivoRecibido = MoneyCOP.parse(txtEfectivoRecibido.getText().trim());
+                if (efectivoRecibido.compareTo(MoneyCOP.normalize(totalAmount)) < 0) {
                     lblError.setText("El efectivo recibido es insuficiente.");
                     return;
                 }
-            } catch (NumberFormatException e) {
+            } catch (InvalidMoneyFormatException e) {
                 lblError.setText("Ingresa un monto válido.");
                 return;
             }

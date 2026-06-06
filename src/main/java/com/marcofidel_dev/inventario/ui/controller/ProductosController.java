@@ -2,6 +2,9 @@ package com.marcofidel_dev.inventario.ui.controller;
 
 import com.marcofidel_dev.inventario.application.service.ProductoService;
 import com.marcofidel_dev.inventario.domain.entity.Producto;
+import com.marcofidel_dev.inventario.shared.money.InvalidMoneyFormatException;
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
+import com.marcofidel_dev.inventario.ui.common.MoneyTableCell;
 import com.marcofidel_dev.inventario.ui.common.UIPermissionService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -14,12 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 
 @Component
 @RequiredArgsConstructor
@@ -103,79 +102,38 @@ public class ProductosController {
     }
 
     private void configurarFormatoPrecios() {
-        // Configurar formateador con punto como separador decimal
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
-        symbols.setDecimalSeparator('.');
-        DecimalFormat df = new DecimalFormat("#0.000", symbols);
+        attachMoneyFocusListener(txtCosto);
+        attachMoneyFocusListener(txtPrecioVenta);
+    }
 
-        // Configurar TextField de costo
-        txtCosto.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal && !txtCosto.getText().isEmpty()) {
+    private void attachMoneyFocusListener(javafx.scene.control.TextField field) {
+        field.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            String raw = field.getText();
+            if (isNowFocused && !raw.isBlank()) {
+                field.setText(raw.replace(".", ""));
+                field.selectAll();
+            } else if (!isNowFocused && !raw.isBlank()) {
                 try {
-                    // Aceptar tanto punto como coma
-                    String texto = txtCosto.getText().replace(',', '.');
-                    BigDecimal valor = new BigDecimal(texto)
-                        .setScale(3, RoundingMode.HALF_UP);
-                    txtCosto.setText(df.format(valor));
-                } catch (NumberFormatException e) {
-                    // Ignorar si no es un número válido
-                }
-            }
-        });
-
-        // Configurar TextField de precio venta
-        txtPrecioVenta.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal && !txtPrecioVenta.getText().isEmpty()) {
-                try {
-                    // Aceptar tanto punto como coma
-                    String texto = txtPrecioVenta.getText().replace(',', '.');
-                    BigDecimal valor = new BigDecimal(texto)
-                        .setScale(3, RoundingMode.HALF_UP);
-                    txtPrecioVenta.setText(df.format(valor));
-                } catch (NumberFormatException e) {
-                    // Ignorar si no es un número válido
+                    BigDecimal value = MoneyCOP.parse(raw);
+                    field.setText(value.signum() == 0 ? "" : MoneyCOP.formatPlain(value));
+                } catch (InvalidMoneyFormatException e) {
+                    // leave as-is; validation on submit
                 }
             }
         });
     }
 
     private void configurarTabla() {
-        // Configurar formateador con punto como separador
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
-        symbols.setDecimalSeparator('.');
-        DecimalFormat df = new DecimalFormat("#0.000", symbols);
-
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colTipo.setCellValueFactory(new PropertyValueFactory<>("tipo"));
         colMarca.setCellValueFactory(new PropertyValueFactory<>("marca"));
         colSku.setCellValueFactory(new PropertyValueFactory<>("codigoProducto"));
 
-        // Formatear columnas de precio con 3 decimales
         colCosto.setCellValueFactory(new PropertyValueFactory<>("costo"));
-        colCosto.setCellFactory(col -> new TableCell<Producto, BigDecimal>() {
-            @Override
-            protected void updateItem(BigDecimal item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(df.format(item));
-                }
-            }
-        });
+        colCosto.setCellFactory(MoneyTableCell.factory());
 
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precioVenta"));
-        colPrecio.setCellFactory(col -> new TableCell<Producto, BigDecimal>() {
-            @Override
-            protected void updateItem(BigDecimal item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(df.format(item));
-                }
-            }
-        });
+        colPrecio.setCellFactory(MoneyTableCell.factory());
 
         colStock.setCellValueFactory(new PropertyValueFactory<>("stockActual"));
         colStockMin.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
@@ -253,10 +211,8 @@ public class ProductosController {
             producto.setMarca(txtMarca.getText().trim().isEmpty() ? null : txtMarca.getText().trim());
             producto.setCodigoProducto(txtSku.getText().trim().isEmpty() ? null : txtSku.getText().trim());
 
-            // Aplicar setScale(3, HALF_UP) para garantizar 3 decimales
-            // Reemplazar coma por punto antes de convertir
-            producto.setCosto(new BigDecimal(txtCosto.getText().replace(',', '.')).setScale(3, RoundingMode.HALF_UP));
-            producto.setPrecioVenta(new BigDecimal(txtPrecioVenta.getText().replace(',', '.')).setScale(3, RoundingMode.HALF_UP));
+            producto.setCosto(MoneyCOP.parse(txtCosto.getText()));
+            producto.setPrecioVenta(MoneyCOP.parse(txtPrecioVenta.getText()));
 
             producto.setStockActual(Integer.parseInt(txtStockActual.getText()));
             producto.setStockMinimo(Integer.parseInt(txtStockMinimo.getText()));
@@ -300,19 +256,13 @@ public class ProductosController {
     private void cargarFormulario(Producto producto) {
         productoSeleccionado = producto;
 
-        // Configurar formateador con punto como separador
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
-        symbols.setDecimalSeparator('.');
-        DecimalFormat df = new DecimalFormat("#0.000", symbols);
-
         cmbTipo.setValue(producto.getTipo());
         txtNombre.setText(producto.getNombre());
         txtMarca.setText(producto.getMarca() != null ? producto.getMarca() : "");
         txtSku.setText(producto.getCodigoProducto() != null ? producto.getCodigoProducto() : "");
 
-        // Formatear precios con 3 decimales y punto como separador
-        txtCosto.setText(df.format(producto.getCosto()));
-        txtPrecioVenta.setText(df.format(producto.getPrecioVenta()));
+        txtCosto.setText(MoneyCOP.formatPlain(producto.getCosto()));
+        txtPrecioVenta.setText(MoneyCOP.formatPlain(producto.getPrecioVenta()));
 
         txtStockActual.setText(producto.getStockActual().toString());
         txtStockMinimo.setText(producto.getStockMinimo().toString());
@@ -345,23 +295,15 @@ public class ProductosController {
             return false;
         }
         try {
-            BigDecimal costo = new BigDecimal(txtCosto.getText().replace(',', '.'));
-            if (costo.compareTo(BigDecimal.ZERO) < 0) {
-                mostrarAdvertencia("El costo debe ser mayor o igual a 0");
-                return false;
-            }
-        } catch (Exception e) {
-            mostrarAdvertencia("El costo debe ser un número válido");
+            MoneyCOP.parse(txtCosto.getText());
+        } catch (InvalidMoneyFormatException e) {
+            mostrarAdvertencia("Costo inválido: " + e.getMessage());
             return false;
         }
         try {
-            BigDecimal precio = new BigDecimal(txtPrecioVenta.getText().replace(',', '.'));
-            if (precio.compareTo(BigDecimal.ZERO) < 0) {
-                mostrarAdvertencia("El precio de venta debe ser mayor o igual a 0");
-                return false;
-            }
-        } catch (Exception e) {
-            mostrarAdvertencia("El precio de venta debe ser un número válido");
+            MoneyCOP.parse(txtPrecioVenta.getText());
+        } catch (InvalidMoneyFormatException e) {
+            mostrarAdvertencia("Precio de venta inválido: " + e.getMessage());
             return false;
         }
         try {

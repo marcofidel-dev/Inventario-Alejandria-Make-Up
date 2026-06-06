@@ -21,8 +21,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
+
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public class SaleService {
 
         // 4. Discount limit for COLABORADOR
         BigDecimal descuento = dto.discountPercent() != null
-                ? dto.discountPercent().setScale(2, RoundingMode.HALF_UP)
+                ? dto.discountPercent().setScale(2, java.math.RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
         if (sessionContext.hasRole(Role.COLABORADOR) && descuento.compareTo(maxDescColaborador) > 0) {
@@ -101,33 +102,31 @@ public class SaleService {
         }
 
         // 6. Create items with price/cost snapshots and decrement stock atomically
-        BigDecimal subtotal = BigDecimal.ZERO;
+        BigDecimal subtotal = MoneyCOP.ZERO;
         for (int i = 0; i < dto.items().size(); i++) {
             SaleItemInputDTO itemDto = dto.items().get(i);
             Producto producto = productos.get(i);
 
             // Use manually provided price if present, otherwise snapshot current price
             BigDecimal unitPrice = itemDto.unitPrice() != null
-                    ? itemDto.unitPrice().setScale(2, RoundingMode.HALF_UP)
-                    : producto.getPrecioVenta().setScale(2, RoundingMode.HALF_UP);
-            BigDecimal unitCost = producto.getCosto().setScale(2, RoundingMode.HALF_UP);
+                    ? MoneyCOP.normalize(itemDto.unitPrice())
+                    : MoneyCOP.normalize(producto.getPrecioVenta());
+            BigDecimal unitCost = MoneyCOP.normalize(producto.getCosto());
 
             SaleItem item = new SaleItem(producto, itemDto.quantity(), unitPrice, unitCost);
             sale.addItem(item);
-            subtotal = subtotal.add(item.getSubtotal());
+            subtotal = MoneyCOP.add(subtotal, item.getSubtotal());
 
             // Decrement stock — producto is managed within this transaction, flushed on commit
             producto.decrementarStock(itemDto.quantity());
         }
 
         // 7. Calculate totals
-        BigDecimal discountAmount = subtotal
-                .multiply(descuento)
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal discountAmount = MoneyCOP.applyPercentage(subtotal, descuento);
 
-        sale.setSubtotal(subtotal.setScale(2, RoundingMode.HALF_UP));
+        sale.setSubtotal(subtotal);
         sale.setDiscountAmount(discountAmount);
-        sale.setTotal(subtotal.subtract(discountAmount).setScale(2, RoundingMode.HALF_UP));
+        sale.setTotal(MoneyCOP.subtract(subtotal, discountAmount));
 
         Sale saved = saleRepository.save(sale);
 

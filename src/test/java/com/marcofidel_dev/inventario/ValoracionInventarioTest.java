@@ -46,9 +46,9 @@ class ValoracionInventarioTest {
 
         ValoracionInventarioDTO dto = dashboardService.getValoracionInventario();
 
-        assertEquals(new BigDecimal("1000000.00"), dto.valorACosto());
-        assertEquals(new BigDecimal("1500000.00"), dto.valorAPrecioVenta());
-        assertEquals(new BigDecimal("500000.00"),  dto.utilidadPotencial());
+        assertEquals(new BigDecimal("1000000"), dto.valorACosto());
+        assertEquals(new BigDecimal("1500000"), dto.valorAPrecioVenta());
+        assertEquals(new BigDecimal("500000"),  dto.utilidadPotencial());
         // margen = 500000 / 1500000 * 100 = 33.33%
         assertEquals(new BigDecimal("33.33"), dto.margenPromedio());
         assertEquals(50, dto.totalProductos());

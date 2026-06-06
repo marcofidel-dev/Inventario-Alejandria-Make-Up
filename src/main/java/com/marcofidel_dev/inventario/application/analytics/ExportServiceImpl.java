@@ -24,6 +24,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
+
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -428,18 +430,7 @@ public class ExportServiceImpl implements ExportService {
     }
 
     private String cop(BigDecimal v) {
-        if (v == null) return "$0";
-        long val = v.setScale(0, RoundingMode.HALF_UP).longValue();
-        if (val < 0) return "-" + cop(v.negate());
-        String d = String.valueOf(val);
-        StringBuilder sb = new StringBuilder();
-        int rem = d.length() % 3;
-        if (rem > 0) sb.append(d, 0, rem);
-        for (int i = rem; i < d.length(); i += 3) {
-            if (!sb.isEmpty()) sb.append('.');
-            sb.append(d, i, i + 3);
-        }
-        return "$" + sb;
+        return MoneyCOP.format(v);
     }
 
     private String pct(BigDecimal v) {

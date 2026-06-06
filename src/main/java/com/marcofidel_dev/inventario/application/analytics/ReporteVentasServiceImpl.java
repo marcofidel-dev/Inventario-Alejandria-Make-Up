@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -218,6 +219,6 @@ public class ReporteVentasServiceImpl implements ReporteVentasService {
     }
 
     private BigDecimal safe(BigDecimal v) {
-        return v == null ? BigDecimal.ZERO : v.setScale(2, RoundingMode.HALF_UP);
+        return MoneyCOP.normalize(v);
     }
 }

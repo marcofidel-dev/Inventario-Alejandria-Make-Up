@@ -13,8 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -43,7 +43,7 @@ public class CashSessionService {
         CashSession session = new CashSession();
         session.setUserId(user.getId());
         session.setOpeningDate(LocalDateTime.now());
-        session.setInitialCash(efectivoInicial.setScale(2, RoundingMode.HALF_UP));
+        session.setInitialCash(MoneyCOP.normalize(efectivoInicial));
         session.setOpeningNotes(observaciones);
         session.setStatus(CashSessionStatus.ABIERTA);
 
@@ -76,9 +76,9 @@ public class CashSessionService {
                 .map(Sale::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal expectedCash = session.getInitialCash().add(cashSales).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal declared = efectivoDeclarado.setScale(2, RoundingMode.HALF_UP);
-        BigDecimal difference = declared.subtract(expectedCash).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal expectedCash = MoneyCOP.add(session.getInitialCash(), cashSales);
+        BigDecimal declared = MoneyCOP.normalize(efectivoDeclarado);
+        BigDecimal difference = MoneyCOP.subtract(declared, expectedCash);
 
         session.setClosingDate(LocalDateTime.now());
         session.setDeclaredCash(declared);
@@ -107,10 +107,9 @@ public class CashSessionService {
         List<Sale> completedSales = saleRepository
                 .findByCashSessionIdAndStatus(sesionId, SaleStatus.COMPLETADA);
 
-        BigDecimal totalSales = completedSales.stream()
+        BigDecimal totalSales = MoneyCOP.normalize(completedSales.stream()
                 .map(Sale::getTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .setScale(2, RoundingMode.HALF_UP);
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
 
         Map<PaymentMethod, BigDecimal> salesByMethod = new EnumMap<>(PaymentMethod.class);
         for (PaymentMethod method : PaymentMethod.values()) {
@@ -119,12 +118,12 @@ public class CashSessionService {
                     .map(Sale::getTotal)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             if (sub.compareTo(BigDecimal.ZERO) > 0) {
-                salesByMethod.put(method, sub.setScale(2, RoundingMode.HALF_UP));
+                salesByMethod.put(method, MoneyCOP.normalize(sub));
             }
         }
 
-        BigDecimal cashSales = salesByMethod.getOrDefault(PaymentMethod.EFECTIVO, BigDecimal.ZERO);
-        BigDecimal expectedCash = session.getInitialCash().add(cashSales).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal cashSales = salesByMethod.getOrDefault(PaymentMethod.EFECTIVO, MoneyCOP.ZERO);
+        BigDecimal expectedCash = MoneyCOP.add(session.getInitialCash(), cashSales);
 
         String userName = userRepository.findById(session.getUserId())
                 .map(u -> u.getFullName() != null ? u.getFullName() : u.getUsername())

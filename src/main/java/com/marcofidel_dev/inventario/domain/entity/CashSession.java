@@ -1,5 +1,6 @@
 package com.marcofidel_dev.inventario.domain.entity;
 
+import com.marcofidel_dev.inventario.infrastructure.persistence.MoneyConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -30,7 +31,8 @@ public class CashSession {
 
     @NotNull
     @DecimalMin(value = "0.0", inclusive = true)
-    @Column(name = "initial_cash", nullable = false, precision = 10, scale = 2)
+    @Convert(converter = MoneyConverter.class)
+    @Column(name = "initial_cash", nullable = false, precision = 10, scale = 0)
     private BigDecimal initialCash;
 
     @Column(name = "opening_notes")
@@ -39,13 +41,16 @@ public class CashSession {
     @Column(name = "closing_date")
     private LocalDateTime closingDate;
 
-    @Column(name = "declared_cash", precision = 10, scale = 2)
+    @Convert(converter = MoneyConverter.class)
+    @Column(name = "declared_cash", precision = 10, scale = 0)
     private BigDecimal declaredCash;
 
-    @Column(name = "expected_cash", precision = 10, scale = 2)
+    @Convert(converter = MoneyConverter.class)
+    @Column(name = "expected_cash", precision = 10, scale = 0)
     private BigDecimal expectedCash;
 
-    @Column(name = "cash_difference", precision = 10, scale = 2)
+    @Convert(converter = MoneyConverter.class)
+    @Column(name = "cash_difference", precision = 10, scale = 0)
     private BigDecimal cashDifference;
 
     @Column(name = "closing_notes")

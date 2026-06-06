@@ -2,6 +2,8 @@ package com.marcofidel_dev.inventario.ui.controller;
 
 import com.marcofidel_dev.inventario.application.analytics.ReporteCajaService;
 import com.marcofidel_dev.inventario.application.analytics.dto.*;
+import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
+import com.marcofidel_dev.inventario.ui.common.MoneyTableCell;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -13,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -59,11 +60,11 @@ public class ReporteCajaController {
                 c.getValue().openingDate() != null ? c.getValue().openingDate().format(DT_FMT) : "—"));
         colSUsuario.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().nombreUsuario()));
         colSApertura.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().initialCash()));
-        colSApertura.setCellFactory(col -> new MoneyCell<>());
+        colSApertura.setCellFactory(MoneyTableCell.factory());
         colSEsperado.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().expectedCash()));
-        colSEsperado.setCellFactory(col -> new MoneyCell<>());
+        colSEsperado.setCellFactory(MoneyTableCell.factory());
         colSDeclarado.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().declaredCash()));
-        colSDeclarado.setCellFactory(col -> new MoneyCell<>());
+        colSDeclarado.setCellFactory(MoneyTableCell.factory());
         colSDiferencia.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().cashDifference()));
         colSDiferencia.setCellFactory(col -> new DiffCell<>());
         colSEstado.setCellValueFactory(c -> new SimpleStringProperty(estadoLabel(c.getValue())));
@@ -136,53 +137,17 @@ public class ReporteCajaController {
     }
 
     private String cop(BigDecimal v) {
-        if (v == null) return "$0";
-        long val = v.setScale(0, RoundingMode.HALF_UP).longValue();
-        if (val < 0) return "-" + cop(v.negate());
-        String d = String.valueOf(val);
-        StringBuilder sb = new StringBuilder();
-        int rem = d.length() % 3;
-        if (rem > 0) sb.append(d, 0, rem);
-        for (int i = rem; i < d.length(); i += 3) {
-            if (!sb.isEmpty()) sb.append('.');
-            sb.append(d, i, i + 3);
-        }
-        return "$" + sb;
-    }
-
-    private static class MoneyCell<T> extends TableCell<T, BigDecimal> {
-        @Override protected void updateItem(BigDecimal v, boolean empty) {
-            super.updateItem(v, empty);
-            if (empty || v == null) { setText(null); return; }
-            long val = v.setScale(0, RoundingMode.HALF_UP).longValue();
-            String d = String.valueOf(Math.abs(val));
-            StringBuilder sb = new StringBuilder();
-            int rem = d.length() % 3;
-            if (rem > 0) sb.append(d, 0, rem);
-            for (int i = rem; i < d.length(); i += 3) {
-                if (!sb.isEmpty()) sb.append('.');
-                sb.append(d, i, i + 3);
-            }
-            setText((val < 0 ? "-$" : "$") + sb);
-        }
+        return MoneyCOP.format(v);
     }
 
     private static class DiffCell<T> extends TableCell<T, BigDecimal> {
         @Override protected void updateItem(BigDecimal v, boolean empty) {
             super.updateItem(v, empty);
             if (empty || v == null) { setText(null); setStyle(""); return; }
-            long val = v.setScale(0, RoundingMode.HALF_UP).longValue();
-            String d = String.valueOf(Math.abs(val));
-            StringBuilder sb = new StringBuilder();
-            int rem = d.length() % 3;
-            if (rem > 0) sb.append(d, 0, rem);
-            for (int i = rem; i < d.length(); i += 3) {
-                if (!sb.isEmpty()) sb.append('.');
-                sb.append(d, i, i + 3);
-            }
-            setText((val < 0 ? "-$" : "$") + sb);
-            if (val < 0) setStyle("-fx-text-fill: #D32F2F; -fx-font-weight: bold;");
-            else if (val > 0) setStyle("-fx-text-fill: #F57C00; -fx-font-weight: bold;");
+            setText(MoneyCOP.format(v));
+            int sign = MoneyCOP.normalize(v).signum();
+            if (sign < 0) setStyle("-fx-text-fill: #D32F2F; -fx-font-weight: bold;");
+            else if (sign > 0) setStyle("-fx-text-fill: #F57C00; -fx-font-weight: bold;");
             else setStyle("-fx-text-fill: #388E3C;");
         }
     }
