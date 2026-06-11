@@ -96,8 +96,13 @@ public class ReporteInventarioController {
     @FXML private TableColumn<MargenProductoDTO, BigDecimal> colMgPesos;
     @FXML private TableColumn<MargenProductoDTO, BigDecimal> colMgPct;
 
+    @FXML private DatePicker dpDesde;
+    @FXML private DatePicker dpHasta;
+
     @FXML
     public void initialize() {
+        dpDesde.setValue(LocalDate.now().minusDays(29));
+        dpHasta.setValue(LocalDate.now());
         configurarTablas();
         cargarDatos();
     }
@@ -156,15 +161,21 @@ public class ReporteInventarioController {
     }
 
     private void cargarDatos() {
-        LocalDate desde = LocalDate.now().minusDays(29);
-        LocalDate hasta = LocalDate.now();
+        LocalDate desde = dpDesde.getValue();
+        LocalDate hasta = dpHasta.getValue();
         CompletableFuture.runAsync(() -> {
             try {
+                log.debug("Cargando valoración...");
                 ValoracionInventarioDTO val               = reporteInventarioService.getValoracionActual();
+                log.debug("Cargando inventario por valor...");
                 List<InventarioPorValorDTO> inv           = reporteInventarioService.getInventarioPorValor();
+                log.debug("Cargando stock crítico...");
                 List<ProductoStockCriticoDTO> critico     = dashboardService.getProductosStockCritico();
+                log.debug("Cargando sin rotación...");
                 List<ProductoSinRotacionDTO> sinRot       = dashboardService.getProductosSinRotacion(30);
+                log.debug("Cargando análisis ABC ({} — {})...", desde, hasta);
                 AnalisisABCDTO abc                        = reporteVentasService.getAnalisisABC(desde, hasta);
+                log.debug("Cargando márgenes...");
                 List<MargenProductoDTO> margenes          = reporteInventarioService.getMargenes();
 
                 Platform.runLater(() -> {
@@ -194,20 +205,59 @@ public class ReporteInventarioController {
                 });
             } catch (Exception ex) {
                 log.error("Error cargando reporte inventario", ex);
+                String detalle = ex.getMessage() != null ? ex.getMessage()
+                        : ex.getClass().getSimpleName();
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("No se pudieron cargar los datos del inventario");
+                    alert.setContentText(detalle + "\n(Revisa la consola/log para el stack trace completo)");
+                    alert.showAndWait();
+                });
+            }
+        });
+    }
+
+    @FXML
+    public void aplicarFiltroABC() {
+        LocalDate desde = dpDesde.getValue();
+        LocalDate hasta = dpHasta.getValue();
+        if (desde == null || hasta == null || desde.isAfter(hasta)) return;
+        CompletableFuture.runAsync(() -> {
+            try {
+                AnalisisABCDTO abc = reporteVentasService.getAnalisisABC(desde, hasta);
+                Platform.runLater(() -> {
+                    tblABC_A.setItems(FXCollections.observableArrayList(abc.categoriaA()));
+                    tblABC_B.setItems(FXCollections.observableArrayList(abc.categoriaB()));
+                    tblABC_C.setItems(FXCollections.observableArrayList(abc.categoriaC()));
+                });
+            } catch (Exception ex) {
+                log.error("Error recargando análisis ABC", ex);
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("No se pudo recargar el análisis ABC");
+                    alert.setContentText(ex.getMessage());
+                    alert.showAndWait();
+                });
             }
         });
     }
 
     @FXML
     public void exportarPDF() {
+        LocalDate desde = dpDesde.getValue() != null ? dpDesde.getValue() : LocalDate.now().minusDays(29);
+        LocalDate hasta = dpHasta.getValue() != null ? dpHasta.getValue() : LocalDate.now();
         guardarArchivo("reporte_inventario.pdf", "Archivos PDF", "*.pdf",
-                () -> exportService.exportarInventarioPDF());
+                () -> exportService.exportarInventarioPDF(desde, hasta));
     }
 
     @FXML
     public void exportarExcel() {
+        LocalDate desde = dpDesde.getValue() != null ? dpDesde.getValue() : LocalDate.now().minusDays(29);
+        LocalDate hasta = dpHasta.getValue() != null ? dpHasta.getValue() : LocalDate.now();
         guardarArchivo("reporte_inventario.xlsx", "Archivos Excel", "*.xlsx",
-                () -> exportService.exportarInventarioExcel());
+                () -> exportService.exportarInventarioExcel(desde, hasta));
     }
 
     private void guardarArchivo(String nombre, String desc, String ext,

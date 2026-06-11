@@ -176,7 +176,8 @@ public class DashboardService {
     @Transactional(readOnly = true)
     public ValoracionInventarioDTO getValoracionInventario() {
         return cache.compute("valoracion", () -> {
-            Object[] row = productoRepository.findValoracionRaw();
+            List<Object[]> rows = productoRepository.findValoracionRaw();
+            Object[] row = (rows == null || rows.isEmpty()) ? null : rows.get(0);
             if (row == null || row[0] == null) {
                 return new ValoracionInventarioDTO(
                         BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
@@ -187,7 +188,7 @@ public class DashboardService {
             int totalProd       = toInt(row[2]);
             int totalUnid       = toInt(row[3]);
             BigDecimal potencial = MoneyCOP.subtract(aVenta, aCosto);
-            BigDecimal margen   = aCosto.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO
+            BigDecimal margen   = aVenta.compareTo(BigDecimal.ZERO) == 0 ? BigDecimal.ZERO
                     : potencial.divide(aVenta, 4, RoundingMode.HALF_UP)
                                .multiply(BigDecimal.valueOf(100))
                                .setScale(2, RoundingMode.HALF_UP);
@@ -293,7 +294,14 @@ public class DashboardService {
 
     private BigDecimal toBD(Object o) {
         if (o == null) return MoneyCOP.ZERO;
-        return MoneyCOP.normalize(new BigDecimal(o.toString()));
+        String s = o.toString().trim();
+        if (s.isEmpty()) return MoneyCOP.ZERO;
+        try {
+            return MoneyCOP.normalize(new BigDecimal(s));
+        } catch (NumberFormatException e) {
+            log.warn("toBD: BigDecimal parse failed for '{}', falling back to Double.parseDouble", s);
+            return MoneyCOP.normalize(BigDecimal.valueOf(Double.parseDouble(s)));
+        }
     }
 
     private int toInt(Object o) {

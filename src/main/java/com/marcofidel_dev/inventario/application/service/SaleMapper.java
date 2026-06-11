@@ -28,7 +28,8 @@ public class SaleMapper {
                 sale.getPaymentMethod(),
                 customerName,
                 sale.getItems().size(),
-                sale.getStatus()
+                sale.getStatus(),
+                sale.isVirtualSale()
         );
     }
 
@@ -50,6 +51,7 @@ public class SaleMapper {
                 sale.getStatus(),
                 customerName,
                 sale.getNotes(),
+                sale.isVirtualSale(),
                 items
         );
     }
@@ -88,6 +90,7 @@ public class SaleMapper {
                 sellerName,
                 sale.getVoidReason(),
                 sale.getNotes(),
+                sale.isVirtualSale(),
                 items
         );
     }

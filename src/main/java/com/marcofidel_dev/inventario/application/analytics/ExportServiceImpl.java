@@ -14,6 +14,7 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.marcofidel_dev.inventario.application.analytics.dto.*;
+import com.marcofidel_dev.inventario.application.service.DashboardService;
 import com.marcofidel_dev.inventario.domain.entity.Role;
 import com.marcofidel_dev.inventario.infrastructure.security.RequiresRole;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,7 @@ public class ExportServiceImpl implements ExportService {
     private final ReporteVentasService reporteVentasService;
     private final ReporteInventarioService reporteInventarioService;
     private final ReporteClientesService reporteClientesService;
+    private final DashboardService dashboardService;
 
     @Value("${pos.comprobante.empresa.nombre:Alejandría Make-Up}")
     private String empresaNombre;
@@ -189,9 +191,13 @@ public class ExportServiceImpl implements ExportService {
     @Override
     @RequiresRole(Role.ADMIN)
     @Transactional(readOnly = true)
-    public byte[] exportarInventarioPDF() {
-        ValoracionInventarioDTO val = reporteInventarioService.getValoracionActual();
-        List<InventarioPorValorDTO> items = reporteInventarioService.getInventarioPorValor();
+    public byte[] exportarInventarioPDF(LocalDate desde, LocalDate hasta) {
+        ValoracionInventarioDTO val        = reporteInventarioService.getValoracionActual();
+        List<InventarioPorValorDTO> items  = reporteInventarioService.getInventarioPorValor();
+        List<ProductoStockCriticoDTO> critico = dashboardService.getProductosStockCritico();
+        List<ProductoSinRotacionDTO> sinRot   = dashboardService.getProductosSinRotacion(30);
+        AnalisisABCDTO abc                    = reporteVentasService.getAnalisisABC(desde, hasta);
+        List<MargenProductoDTO> margenes      = reporteInventarioService.getMargenes();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         try (PdfWriter writer = new PdfWriter(baos);
@@ -229,6 +235,83 @@ public class ExportServiceImpl implements ExportService {
                 t.addCell(iCell(cop(i.valorAPrecioVenta()), normal, 8));
             }
             doc.add(t);
+
+            // ── Stock Crítico ───────────────────────────────────────────────
+            doc.add(new Paragraph(" "));
+            doc.add(new Paragraph("Stock Crítico").setFont(bold).setFontSize(12));
+            if (critico.isEmpty()) {
+                doc.add(new Paragraph("Todos los productos tienen stock suficiente.")
+                        .setFont(normal).setFontSize(9));
+            } else {
+                Table tc = new Table(UnitValue.createPercentArray(new float[]{38, 14, 12, 12, 12}))
+                        .setWidth(UnitValue.createPercentValue(100));
+                addHeaderRow(tc, bold, "Producto", "Código", "Stock", "Mínimo", "Faltan");
+                for (ProductoStockCriticoDTO p : critico) {
+                    tc.addCell(iCell(p.nombre(), normal, 8));
+                    tc.addCell(iCell(p.codigoProducto() != null ? p.codigoProducto() : "", normal, 8));
+                    tc.addCell(iCell(String.valueOf(p.stockActual()), normal, 8));
+                    tc.addCell(iCell(String.valueOf(p.stockMinimo()), normal, 8));
+                    tc.addCell(iCell(String.valueOf(Math.abs(p.diferencia())), normal, 8));
+                }
+                doc.add(tc);
+            }
+
+            // ── Sin Rotación ────────────────────────────────────────────────
+            doc.add(new Paragraph(" "));
+            doc.add(new Paragraph("Sin Rotación (30+ días sin ventas)").setFont(bold).setFontSize(12));
+            if (sinRot.isEmpty()) {
+                doc.add(new Paragraph("Todos los productos han tenido movimiento en 30 días.")
+                        .setFont(normal).setFontSize(9));
+            } else {
+                Table ts = new Table(UnitValue.createPercentArray(new float[]{50, 20, 30}))
+                        .setWidth(UnitValue.createPercentValue(100));
+                addHeaderRow(ts, bold, "Producto", "Stock", "Última Venta");
+                for (ProductoSinRotacionDTO p : sinRot) {
+                    ts.addCell(iCell(p.nombre(), normal, 8));
+                    ts.addCell(iCell(String.valueOf(p.stockActual()), normal, 8));
+                    ts.addCell(iCell(p.ultimaVenta() != null
+                            ? p.ultimaVenta().format(FMT_FECHA) : "Nunca", normal, 8));
+                }
+                doc.add(ts);
+            }
+
+            // ── Análisis ABC ────────────────────────────────────────────────
+            doc.add(new Paragraph(" "));
+            doc.add(new Paragraph("Análisis ABC — " + desde.format(FMT_FECHA)
+                    + " al " + hasta.format(FMT_FECHA)).setFont(bold).setFontSize(12));
+            if (abc.categoriaA().isEmpty() && abc.categoriaB().isEmpty() && abc.categoriaC().isEmpty()) {
+                doc.add(new Paragraph("Sin datos de ventas en el período seleccionado.")
+                        .setFont(normal).setFontSize(9));
+            } else {
+                if (!abc.categoriaA().isEmpty()) {
+                    doc.add(new Paragraph("Categoría A — 80% de ingresos").setFont(bold).setFontSize(10));
+                    doc.add(buildAbcTable(abc.categoriaA(), bold, normal));
+                }
+                if (!abc.categoriaB().isEmpty()) {
+                    doc.add(new Paragraph("Categoría B — 15% de ingresos").setFont(bold).setFontSize(10));
+                    doc.add(buildAbcTable(abc.categoriaB(), bold, normal));
+                }
+                if (!abc.categoriaC().isEmpty()) {
+                    doc.add(new Paragraph("Categoría C — 5% de ingresos").setFont(bold).setFontSize(10));
+                    doc.add(buildAbcTable(abc.categoriaC(), bold, normal));
+                }
+            }
+
+            // ── Márgenes ────────────────────────────────────────────────────
+            doc.add(new Paragraph(" "));
+            doc.add(new Paragraph("Análisis de Márgenes").setFont(bold).setFontSize(12));
+            Table tm = new Table(UnitValue.createPercentArray(new float[]{35, 12, 18, 18, 17}))
+                    .setWidth(UnitValue.createPercentValue(100));
+            addHeaderRow(tm, bold, "Producto", "Código", "Costo", "Precio", "Margen %");
+            for (MargenProductoDTO m : margenes) {
+                tm.addCell(iCell(m.nombre(), normal, 8));
+                tm.addCell(iCell(m.codigoProducto() != null ? m.codigoProducto() : "", normal, 8));
+                tm.addCell(iCell(cop(m.costo()), normal, 8));
+                tm.addCell(iCell(cop(m.precioVenta()), normal, 8));
+                tm.addCell(iCell(pct(m.margenPorcentaje()), normal, 8));
+            }
+            doc.add(tm);
+
             doc.close();
         } catch (Exception e) {
             log.error("Error generando PDF de inventario", e);
@@ -242,9 +325,12 @@ public class ExportServiceImpl implements ExportService {
     @Override
     @RequiresRole(Role.ADMIN)
     @Transactional(readOnly = true)
-    public byte[] exportarInventarioExcel() {
-        List<InventarioPorValorDTO> items = reporteInventarioService.getInventarioPorValor();
-        List<MargenProductoDTO> margenes  = reporteInventarioService.getMargenes();
+    public byte[] exportarInventarioExcel(LocalDate desde, LocalDate hasta) {
+        List<InventarioPorValorDTO> items    = reporteInventarioService.getInventarioPorValor();
+        List<MargenProductoDTO> margenes     = reporteInventarioService.getMargenes();
+        List<ProductoStockCriticoDTO> critico = dashboardService.getProductosStockCritico();
+        List<ProductoSinRotacionDTO> sinRot   = dashboardService.getProductosSinRotacion(30);
+        AnalisisABCDTO abc                    = reporteVentasService.getAnalisisABC(desde, hasta);
 
         try (Workbook wb = new XSSFWorkbook()) {
             CellStyle hdr   = buildHeaderStyle(wb);
@@ -281,6 +367,63 @@ public class ExportServiceImpl implements ExportService {
                 excelCell(row, 6, m.margenPorcentaje(), pctSt);
             }
             for (int i = 0; i < 7; i++) mg.autoSizeColumn(i);
+
+            // Stock Crítico
+            Sheet criticoSh = wb.createSheet("Stock Crítico");
+            writeHeader(criticoSh, new String[]{"Producto", "Código", "Stock", "Mínimo", "Faltan"}, hdr);
+            int cr = 1;
+            for (ProductoStockCriticoDTO p : critico) {
+                Row rowC = criticoSh.createRow(cr++);
+                excelCell(rowC, 0, p.nombre());
+                excelCell(rowC, 1, p.codigoProducto() != null ? p.codigoProducto() : "");
+                excelCell(rowC, 2, String.valueOf(p.stockActual()));
+                excelCell(rowC, 3, String.valueOf(p.stockMinimo()));
+                excelCell(rowC, 4, String.valueOf(Math.abs(p.diferencia())));
+            }
+            for (int i = 0; i < 5; i++) criticoSh.autoSizeColumn(i);
+
+            // Sin Rotación
+            Sheet sinRotSh = wb.createSheet("Sin Rotación");
+            writeHeader(sinRotSh, new String[]{"Producto", "Stock", "Última Venta"}, hdr);
+            int sr = 1;
+            for (ProductoSinRotacionDTO p : sinRot) {
+                Row rowS = sinRotSh.createRow(sr++);
+                excelCell(rowS, 0, p.nombre());
+                excelCell(rowS, 1, String.valueOf(p.stockActual()));
+                excelCell(rowS, 2, p.ultimaVenta() != null
+                        ? p.ultimaVenta().format(FMT_FECHA) : "Nunca");
+            }
+            for (int i = 0; i < 3; i++) sinRotSh.autoSizeColumn(i);
+
+            // Análisis ABC
+            Sheet abcSh = wb.createSheet("Análisis ABC");
+            writeHeader(abcSh, new String[]{"Categoría", "Producto", "Código", "Unidades", "Ingreso", "% Acum."}, hdr);
+            int ar = 1;
+            for (ProductoABCDTO p : abc.categoriaA()) {
+                Row row = abcSh.createRow(ar++);
+                excelCell(row, 0, "A"); excelCell(row, 1, p.nombre());
+                excelCell(row, 2, p.codigoProducto() != null ? p.codigoProducto() : "");
+                excelCell(row, 3, String.valueOf(p.unidadesVendidas()));
+                excelCell(row, 4, p.ingreso(), money);
+                excelCell(row, 5, p.porcentajeAcumulado(), pctSt);
+            }
+            for (ProductoABCDTO p : abc.categoriaB()) {
+                Row row = abcSh.createRow(ar++);
+                excelCell(row, 0, "B"); excelCell(row, 1, p.nombre());
+                excelCell(row, 2, p.codigoProducto() != null ? p.codigoProducto() : "");
+                excelCell(row, 3, String.valueOf(p.unidadesVendidas()));
+                excelCell(row, 4, p.ingreso(), money);
+                excelCell(row, 5, p.porcentajeAcumulado(), pctSt);
+            }
+            for (ProductoABCDTO p : abc.categoriaC()) {
+                Row row = abcSh.createRow(ar++);
+                excelCell(row, 0, "C"); excelCell(row, 1, p.nombre());
+                excelCell(row, 2, p.codigoProducto() != null ? p.codigoProducto() : "");
+                excelCell(row, 3, String.valueOf(p.unidadesVendidas()));
+                excelCell(row, 4, p.ingreso(), money);
+                excelCell(row, 5, p.porcentajeAcumulado(), pctSt);
+            }
+            for (int i = 0; i < 6; i++) abcSh.autoSizeColumn(i);
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             wb.write(out);
@@ -435,5 +578,18 @@ public class ExportServiceImpl implements ExportService {
 
     private String pct(BigDecimal v) {
         return (v != null ? v.setScale(1, RoundingMode.HALF_UP).toPlainString() : "0.0") + "%";
+    }
+
+    private Table buildAbcTable(List<ProductoABCDTO> items, PdfFont bold, PdfFont normal) {
+        Table t = new Table(UnitValue.createPercentArray(new float[]{42, 14, 25, 19}))
+                .setWidth(UnitValue.createPercentValue(100));
+        addHeaderRow(t, bold, "Producto", "Unidades", "Ingreso", "% Acum.");
+        for (ProductoABCDTO p : items) {
+            t.addCell(iCell(p.nombre(), normal, 8));
+            t.addCell(iCell(String.valueOf(p.unidadesVendidas()), normal, 8));
+            t.addCell(iCell(cop(p.ingreso()), normal, 8));
+            t.addCell(iCell(pct(p.porcentajeAcumulado()), normal, 8));
+        }
+        return t;
     }
 }

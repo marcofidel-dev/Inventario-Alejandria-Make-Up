@@ -36,7 +36,8 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
             COALESCE(SUM(si.quantity), 0)           AS cantidadProductosVendidos
         FROM sale s
         LEFT JOIN sale_item si ON si.sale_id = s.id
-        WHERE s.sale_date >= :desde AND s.sale_date < :hasta
+        WHERE DATETIME(s.sale_date/1000, 'unixepoch') >= :desde
+          AND DATETIME(s.sale_date/1000, 'unixepoch') < :hasta
           AND s.status = 'COMPLETADA'
         """, nativeQuery = true)
     KPIProjection findKPIs(@Param("desde") LocalDateTime desde,
@@ -44,15 +45,16 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 
     @Query(value = """
         SELECT
-            DATE(s.sale_date)                                                         AS fecha,
+            DATE(s.sale_date/1000, 'unixepoch')                                       AS fecha,
             COALESCE(ROUND(SUM(s.total), 2), 0.0)                                    AS totalVendido,
             COALESCE(ROUND(SUM(si.quantity * (si.unit_price - si.unit_cost)), 2), 0.0) AS utilidad,
             COUNT(DISTINCT s.id)                                                       AS cantidadVentas
         FROM sale s
         JOIN sale_item si ON si.sale_id = s.id
-        WHERE s.sale_date >= :desde AND s.sale_date < :hasta
+        WHERE DATETIME(s.sale_date/1000, 'unixepoch') >= :desde
+          AND DATETIME(s.sale_date/1000, 'unixepoch') < :hasta
           AND s.status = 'COMPLETADA'
-        GROUP BY DATE(s.sale_date)
+        GROUP BY DATE(s.sale_date/1000, 'unixepoch')
         ORDER BY fecha
         """, nativeQuery = true)
     List<VentaDiariaProjection> findVentasDiarias(@Param("desde") LocalDateTime desde,
@@ -60,13 +62,13 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 
     @Query(value = """
         SELECT
-            CAST(STRFTIME('%H', s.sale_date) AS INTEGER) AS hora,
-            COUNT(DISTINCT s.id)                          AS cantidadVentas,
-            COALESCE(ROUND(SUM(s.total), 2), 0.0)         AS totalVendido
+            CAST(STRFTIME('%H', s.sale_date/1000, 'unixepoch') AS INTEGER) AS hora,
+            COUNT(DISTINCT s.id)                                            AS cantidadVentas,
+            COALESCE(ROUND(SUM(s.total), 2), 0.0)                          AS totalVendido
         FROM sale s
-        WHERE DATE(s.sale_date) = :fecha
+        WHERE DATE(s.sale_date/1000, 'unixepoch') = :fecha
           AND s.status = 'COMPLETADA'
-        GROUP BY STRFTIME('%H', s.sale_date)
+        GROUP BY STRFTIME('%H', s.sale_date/1000, 'unixepoch')
         ORDER BY hora
         """, nativeQuery = true)
     List<VentaPorHoraProjection> findVentasPorHora(@Param("fecha") String fecha);
@@ -82,7 +84,8 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
         FROM sale_item si
         JOIN sale s      ON s.id  = si.sale_id
         JOIN producto p  ON p.id  = si.producto_id
-        WHERE s.sale_date >= :desde AND s.sale_date < :hasta
+        WHERE DATETIME(s.sale_date/1000, 'unixepoch') >= :desde
+          AND DATETIME(s.sale_date/1000, 'unixepoch') < :hasta
           AND s.status = 'COMPLETADA'
         GROUP BY si.producto_id, p.codigo_producto, p.nombre
         ORDER BY unidadesVendidas DESC
@@ -98,7 +101,8 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
             COALESCE(ROUND(SUM(s.total), 2), 0.0)  AS total,
             COUNT(DISTINCT s.id)                    AS cantidadVentas
         FROM sale s
-        WHERE s.sale_date >= :desde AND s.sale_date < :hasta
+        WHERE DATETIME(s.sale_date/1000, 'unixepoch') >= :desde
+          AND DATETIME(s.sale_date/1000, 'unixepoch') < :hasta
           AND s.status = 'COMPLETADA'
         GROUP BY s.payment_method
         ORDER BY total DESC
@@ -115,7 +119,8 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
             COALESCE(ROUND(AVG(s.total), 2), 0.0)    AS ticketPromedio
         FROM sale s
         JOIN users u ON u.id = s.user_id
-        WHERE s.sale_date >= :desde AND s.sale_date < :hasta
+        WHERE DATETIME(s.sale_date/1000, 'unixepoch') >= :desde
+          AND DATETIME(s.sale_date/1000, 'unixepoch') < :hasta
           AND s.status = 'COMPLETADA'
         GROUP BY s.user_id, u.full_name, u.username
         ORDER BY totalVendido DESC
@@ -127,7 +132,8 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
         SELECT COALESCE(u.full_name, u.username)
         FROM sale s
         JOIN users u ON u.id = s.user_id
-        WHERE s.sale_date >= :desde AND s.sale_date < :hasta
+        WHERE DATETIME(s.sale_date/1000, 'unixepoch') >= :desde
+          AND DATETIME(s.sale_date/1000, 'unixepoch') < :hasta
           AND s.status = 'COMPLETADA'
         GROUP BY s.user_id, u.full_name, u.username
         ORDER BY SUM(s.total) DESC
@@ -139,7 +145,8 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
     @Query(value = """
         SELECT s.*
         FROM sale s
-        WHERE s.sale_date >= :desde AND s.sale_date < :hasta
+        WHERE DATETIME(s.sale_date/1000, 'unixepoch') >= :desde
+          AND DATETIME(s.sale_date/1000, 'unixepoch') < :hasta
           AND (:estado IS NULL OR s.status = :estado)
           AND (:userId IS NULL OR s.user_id = :userId)
           AND (:clienteId IS NULL OR s.customer_id = :clienteId)

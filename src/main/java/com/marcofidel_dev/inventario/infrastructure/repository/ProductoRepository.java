@@ -70,7 +70,8 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
         LEFT JOIN sale_item si ON si.producto_id = p.id
         LEFT JOIN sale s       ON s.id = si.sale_id
             AND s.status = 'COMPLETADA'
-            AND s.sale_date >= :desde AND s.sale_date < :hasta
+            AND DATETIME(s.sale_date/1000, 'unixepoch') >= :desde
+            AND DATETIME(s.sale_date/1000, 'unixepoch') < :hasta
         WHERE p.activo = 1
         GROUP BY p.id, p.nombre, p.stock_actual
         ORDER BY unidadesVendidas DESC
@@ -83,7 +84,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
             p.id                        AS productoId,
             p.nombre                    AS nombre,
             p.stock_actual              AS stockActual,
-            MAX(DATE(s.sale_date))      AS ultimaVenta
+            MAX(DATE(s.sale_date/1000, 'unixepoch')) AS ultimaVenta
         FROM producto p
         LEFT JOIN sale_item si ON si.producto_id = p.id
         LEFT JOIN sale s       ON s.id = si.sale_id AND s.status = 'COMPLETADA'
@@ -104,5 +105,5 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
         FROM producto p
         WHERE p.activo = 1
         """, nativeQuery = true)
-    Object[] findValoracionRaw();
+    List<Object[]> findValoracionRaw();
 }

@@ -10,5 +10,6 @@ public record RegistrarVentaDTO(
         Long customerId,
         PaymentMethod paymentMethod,
         BigDecimal discountPercent,
-        String notes
+        String notes,
+        boolean virtualSale
 ) {}

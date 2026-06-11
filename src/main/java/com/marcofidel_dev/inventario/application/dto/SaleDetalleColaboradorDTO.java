@@ -19,5 +19,6 @@ public record SaleDetalleColaboradorDTO(
         SaleStatus status,
         String customerName,
         String notes,
+        boolean virtualSale,
         List<SaleItemViewDTO> items
 ) {}

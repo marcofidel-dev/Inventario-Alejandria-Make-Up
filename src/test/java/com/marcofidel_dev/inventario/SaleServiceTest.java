@@ -100,7 +100,8 @@ class SaleServiceTest {
                 null,
                 PaymentMethod.EFECTIVO,
                 BigDecimal.ZERO,
-                null
+                null,
+                false
         );
 
         Sale result = saleService.registrarVenta(dto);
@@ -120,7 +121,7 @@ class SaleServiceTest {
 
         RegistrarVentaDTO dto = new RegistrarVentaDTO(
                 List.of(new SaleItemInputDTO(10L, 1, null)),
-                null, PaymentMethod.EFECTIVO, BigDecimal.ZERO, null
+                null, PaymentMethod.EFECTIVO, BigDecimal.ZERO, null, false
         );
 
         assertThrows(SinCajaAbiertaException.class,
@@ -136,7 +137,7 @@ class SaleServiceTest {
         when(cashSessionService.getSesionActiva()).thenReturn(Optional.of(sesionActiva));
 
         RegistrarVentaDTO dto = new RegistrarVentaDTO(
-                List.of(), null, PaymentMethod.EFECTIVO, BigDecimal.ZERO, null
+                List.of(), null, PaymentMethod.EFECTIVO, BigDecimal.ZERO, null, false
         );
 
         assertThrows(VentaSinItemsException.class,
@@ -152,7 +153,7 @@ class SaleServiceTest {
 
         RegistrarVentaDTO dto = new RegistrarVentaDTO(
                 List.of(new SaleItemInputDTO(10L, 10, null)), // 10 > stock(5)
-                null, PaymentMethod.EFECTIVO, BigDecimal.ZERO, null
+                null, PaymentMethod.EFECTIVO, BigDecimal.ZERO, null, false
         );
 
         StockInsuficienteException ex = assertThrows(StockInsuficienteException.class,
@@ -175,7 +176,8 @@ class SaleServiceTest {
                 null,
                 PaymentMethod.EFECTIVO,
                 new BigDecimal("15"), // 15% > máximo 10%
-                null
+                null,
+                false
         );
 
         assertThrows(DescuentoExcedidoException.class,
@@ -208,7 +210,8 @@ class SaleServiceTest {
                 null,
                 PaymentMethod.TARJETA,
                 new BigDecimal("15"),
-                null
+                null,
+                false
         );
 
         Sale result = saleService.registrarVenta(dto);
@@ -236,7 +239,7 @@ class SaleServiceTest {
 
         RegistrarVentaDTO dto = new RegistrarVentaDTO(
                 List.of(new SaleItemInputDTO(10L, 1, new BigDecimal("14000"))),
-                null, PaymentMethod.EFECTIVO, BigDecimal.ZERO, null
+                null, PaymentMethod.EFECTIVO, BigDecimal.ZERO, null, false
         );
 
         saleService.registrarVenta(dto);

@@ -88,6 +88,14 @@
                             style="-fx-background-color: #FCE4EC; -fx-background-radius: 12; -fx-padding: 4 10;
                                    -fx-font-size: 11px; -fx-cursor: hand; -fx-border-color: #E91E63;
                                    -fx-border-radius: 12; -fx-border-width: 1;"/>
+                    <Button text="Cuidado Corporal" onAction="#filtrarCuidadoCorporal"
+                            style="-fx-background-color: #FCE4EC; -fx-background-radius: 12; -fx-padding: 4 10;
+                                   -fx-font-size: 11px; -fx-cursor: hand; -fx-border-color: #E91E63;
+                                   -fx-border-radius: 12; -fx-border-width: 1;"/>
+                    <Button text="Skincare" onAction="#filtrarSkincare"
+                            style="-fx-background-color: #FCE4EC; -fx-background-radius: 12; -fx-padding: 4 10;
+                                   -fx-font-size: 11px; -fx-cursor: hand; -fx-border-color: #E91E63;
+                                   -fx-border-radius: 12; -fx-border-width: 1;"/>
                 </HBox>
             </VBox>
 
@@ -110,7 +118,7 @@
                     </HBox>
 
                     <!-- Cart list -->
-                    <ListView fx:id="lstCarrito" prefHeight="210" VBox.vgrow="ALWAYS"
+                    <ListView fx:id="lstCarrito" prefHeight="170" VBox.vgrow="NEVER"
                               style="-fx-background-radius: 8; -fx-border-color: #EEEEEE; -fx-border-radius: 8;">
                         <placeholder>
                             <Label text="Carrito vacío — agrega productos"
@@ -195,6 +203,10 @@
                     <TextField fx:id="txtNotas" promptText="Notas (opcional)"
                                style="-fx-background-radius: 8; -fx-padding: 8; -fx-border-color: #E0E0E0;
                                       -fx-border-radius: 8; -fx-font-size: 12px;"/>
+
+                    <!-- Virtual sale -->
+                    <CheckBox fx:id="chkVentaVirtual" text="Venta virtual"
+                              style="-fx-font-size: 13px; -fx-text-fill: #4A148C;"/>
 
                     <!-- Error label -->
                     <Label fx:id="lblError" text="" wrapText="true" maxWidth="Infinity"

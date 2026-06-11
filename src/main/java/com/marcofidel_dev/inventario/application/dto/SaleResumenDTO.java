@@ -14,5 +14,6 @@ public record SaleResumenDTO(
         PaymentMethod paymentMethod,
         String customerName,
         int itemCount,
-        SaleStatus status
+        SaleStatus status,
+        boolean virtualSale
 ) {}

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -161,7 +162,12 @@ public class ProductosController {
     }
 
     private void configurarFiltros() {
-        cmbFiltroTipo.setItems(FXCollections.observableArrayList("TODOS", "MAQUILLAJE", "BOLSO", "BISUTERIA"));
+        List<String> tiposFiltro = new ArrayList<>();
+        tiposFiltro.add("TODOS");
+        for (Producto.TipoProducto t : Producto.TipoProducto.values()) {
+            tiposFiltro.add(t.name());
+        }
+        cmbFiltroTipo.setItems(FXCollections.observableArrayList(tiposFiltro));
         cmbFiltroTipo.setValue("TODOS");
 
         cmbTipo.setItems(FXCollections.observableArrayList(Producto.TipoProducto.values()));

@@ -23,5 +23,6 @@ public record SaleDetalleAdminDTO(
         String sellerName,
         String voidReason,
         String notes,
+        boolean virtualSale,
         List<SaleItemAdminViewDTO> items
 ) {}

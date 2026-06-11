@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -130,7 +131,7 @@ class DashboardServiceTest {
     void getValoracionInventario_calculaUtilPotencialYMargen() {
         // aCosto=500000, aVenta=800000, totalProd=20, totalUnid=100
         Object[] raw = { "500000", "800000", 20, 100 };
-        when(productoRepository.findValoracionRaw()).thenReturn(raw);
+        when(productoRepository.findValoracionRaw()).thenReturn(Collections.singletonList(raw));
 
         ValoracionInventarioDTO result = dashboardService.getValoracionInventario();
 

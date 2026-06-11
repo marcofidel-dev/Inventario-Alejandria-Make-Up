@@ -106,17 +106,10 @@ public class MainController {
         cargarVista("/fxml/mis-ventas.fxml");
     }
 
-    @FXML
-    private void mostrarClientes() {
-        // Clients screen — for now show a placeholder if not yet implemented
-        try {
-            cargarVista("/fxml/mis-ventas.fxml"); // reuse mis-ventas as placeholder
-        } catch (Exception e) {
-            log.warn("Vista de clientes no disponible");
-        }
-    }
-
     // ─── Shared navigation ──────────────────────────────────────────────
+    // Nota: la gestión de clientes se realiza desde el POS (modal "Crear cliente rápido").
+    // El análisis de clientes (Top Clientes, Inactivos) está disponible para ADMIN
+    // en el botón "Análisis Clientes" del menú lateral → reporte-clientes.fxml.
 
     @FXML
     private void mostrarProductos() {
@@ -251,8 +244,14 @@ public class MainController {
             Parent vista = fxmlLoader.load(fxmlPath);
             contentArea.getChildren().clear();
             contentArea.getChildren().add(vista);
-        } catch (IOException e) {
-            log.error("Error al cargar vista: " + fxmlPath, e);
+        } catch (Exception e) {
+            log.error("Error al cargar vista: {}", fxmlPath, e);
+            Throwable causa = e.getCause() != null ? e.getCause() : e;
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error al cargar sección");
+            alert.setHeaderText("No se pudo abrir: " + fxmlPath);
+            alert.setContentText(causa.getMessage() != null ? causa.getMessage() : causa.getClass().getSimpleName());
+            alert.showAndWait();
         }
     }
 

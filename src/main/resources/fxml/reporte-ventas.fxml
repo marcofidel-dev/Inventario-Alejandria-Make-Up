@@ -103,7 +103,7 @@
                             <TableColumn fx:id="colDPMetodo"   text="Método"   prefWidth="120"/>
                             <TableColumn fx:id="colDPTotal"    text="Total"    prefWidth="110"/>
                             <TableColumn fx:id="colDPVentas"   text="Ventas"   prefWidth="70"/>
-                            <TableColumn fx:id="colDPPct"      text="%"        prefWidth="70"/>
+                            <TableColumn fx:id="colDPPct"      text="Porc."    prefWidth="70"/>
                         </columns>
                     </TableView>
                 </VBox>

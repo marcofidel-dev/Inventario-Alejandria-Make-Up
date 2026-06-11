@@ -51,6 +51,19 @@
         </VBox>
     </HBox>
 
+    <!-- Filtro período ABC -->
+    <HBox spacing="10" alignment="CENTER_LEFT"
+          style="-fx-background-color: white; -fx-background-radius: 8;
+                 -fx-padding: 10 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 4, 0, 0, 1);">
+        <Label text="Período ABC:" style="-fx-font-size: 12px; -fx-font-weight: 600;"/>
+        <DatePicker fx:id="dpDesde" prefWidth="140"/>
+        <Label text="al" style="-fx-font-size: 12px;"/>
+        <DatePicker fx:id="dpHasta" prefWidth="140"/>
+        <Button text="Aplicar" onAction="#aplicarFiltroABC"
+                style="-fx-background-color: #880E4F; -fx-text-fill: white;
+                       -fx-background-radius: 6; -fx-padding: 6 14; -fx-cursor: hand;"/>
+    </HBox>
+
     <!-- Tabs -->
     <TabPane fx:id="tabPane" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
 
@@ -113,7 +126,7 @@
                                 <TableColumn fx:id="colAA_Nombre"  text="Producto"   prefWidth="200"/>
                                 <TableColumn fx:id="colAA_Unid"    text="Unidades"   prefWidth="80"/>
                                 <TableColumn fx:id="colAA_Ingreso" text="Ingreso"    prefWidth="110"/>
-                                <TableColumn fx:id="colAA_Pct"     text="% Acum."   prefWidth="90"/>
+                                <TableColumn fx:id="colAA_Pct"     text="Acum. %"   prefWidth="90"/>
                             </columns>
                         </TableView>
                     </VBox>
@@ -125,7 +138,7 @@
                                 <TableColumn fx:id="colAB_Nombre"  text="Producto"   prefWidth="200"/>
                                 <TableColumn fx:id="colAB_Unid"    text="Unidades"   prefWidth="80"/>
                                 <TableColumn fx:id="colAB_Ingreso" text="Ingreso"    prefWidth="110"/>
-                                <TableColumn fx:id="colAB_Pct"     text="% Acum."   prefWidth="90"/>
+                                <TableColumn fx:id="colAB_Pct"     text="Acum. %"   prefWidth="90"/>
                             </columns>
                         </TableView>
                     </VBox>
@@ -137,7 +150,7 @@
                                 <TableColumn fx:id="colAC_Nombre"  text="Producto"   prefWidth="200"/>
                                 <TableColumn fx:id="colAC_Unid"    text="Unidades"   prefWidth="80"/>
                                 <TableColumn fx:id="colAC_Ingreso" text="Ingreso"    prefWidth="110"/>
-                                <TableColumn fx:id="colAC_Pct"     text="% Acum."   prefWidth="90"/>
+                                <TableColumn fx:id="colAC_Pct"     text="Acum. %"   prefWidth="90"/>
                             </columns>
                         </TableView>
                     </VBox>
@@ -147,7 +160,7 @@
 
         <!-- Márgenes -->
         <Tab text="Márgenes">
-            <TableView fx:id="tblMargenes">
+            <TableView fx:id="tblMargenes" VBox.vgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="colMgNombre"  text="Producto"   prefWidth="220"/>
                     <TableColumn fx:id="colMgCodigo"  text="Código"     prefWidth="90"/>

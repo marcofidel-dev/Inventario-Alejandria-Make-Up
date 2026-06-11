@@ -37,6 +37,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import javafx.concurrent.Task;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.format.DateTimeFormatter;
@@ -83,6 +85,7 @@ public class PosController {
     @FXML private RadioButton rbNequi;
     @FXML private RadioButton rbDaviplata;
     @FXML private TextField txtNotas;
+    @FXML private CheckBox chkVentaVirtual;
     @FXML private Button btnCobrar;
     @FXML private Label lblError;
     @FXML private Label lblSesionInfo;
@@ -135,9 +138,7 @@ public class PosController {
         cmbTipoFiltro.setConverter(new StringConverter<>() {
             @Override
             public String toString(Producto.TipoProducto t) {
-                if (t == null) return "Todos";
-                String s = t.name();
-                return s.charAt(0) + s.substring(1).toLowerCase(Locale.ROOT);
+                return t == null ? "Todos" : t.getLabel();
             }
             @Override public Producto.TipoProducto fromString(String s) { return null; }
         });
@@ -220,9 +221,11 @@ public class PosController {
         renderResultados(allProducts.stream().filter(Producto::getActivo).limit(20).toList());
     }
 
-    @FXML void filtrarMaquillaje() { setTipoFilter(Producto.TipoProducto.MAQUILLAJE); }
-    @FXML void filtrarBolsos()     { setTipoFilter(Producto.TipoProducto.BOLSO); }
-    @FXML void filtrarBisuteria()  { setTipoFilter(Producto.TipoProducto.BISUTERIA); }
+    @FXML void filtrarMaquillaje()       { setTipoFilter(Producto.TipoProducto.MAQUILLAJE); }
+    @FXML void filtrarBolsos()           { setTipoFilter(Producto.TipoProducto.BOLSO); }
+    @FXML void filtrarBisuteria()        { setTipoFilter(Producto.TipoProducto.BISUTERIA); }
+    @FXML void filtrarCuidadoCorporal()  { setTipoFilter(Producto.TipoProducto.CUIDADO_CORPORAL); }
+    @FXML void filtrarSkincare()         { setTipoFilter(Producto.TipoProducto.SKINCARE); }
 
     private void setTipoFilter(Producto.TipoProducto tipo) {
         currentTipoFilter = tipo;
@@ -470,7 +473,8 @@ public class PosController {
                     clienteDto != null ? clienteDto.id() : null,
                     metodo,
                     parseDescuento(),
-                    notas.isEmpty() ? null : notas
+                    notas.isEmpty() ? null : notas,
+                    chkVentaVirtual.isSelected()
             );
 
             Sale sale = saleService.registrarVenta(dto);
@@ -514,26 +518,50 @@ public class PosController {
     }
 
     private void generarPdf(Long ventaId, BigDecimal efectivoRecibido) {
-        try {
-            byte[] pdf = comprobanteService.generarPDF(ventaId,
-                    efectivoRecibido != null ? efectivoRecibido : BigDecimal.ZERO);
-
-            File tmp = File.createTempFile("comprobante_" + ventaId + "_", ".pdf");
-            try (FileOutputStream fos = new FileOutputStream(tmp)) {
-                fos.write(pdf);
+        Task<File> task = new Task<>() {
+            @Override
+            protected File call() throws Exception {
+                byte[] pdf = comprobanteService.generarPDF(ventaId,
+                        efectivoRecibido != null ? efectivoRecibido : BigDecimal.ZERO);
+                File tmp = File.createTempFile("comprobante_" + ventaId + "_", ".pdf");
+                try (FileOutputStream fos = new FileOutputStream(tmp)) {
+                    fos.write(pdf);
+                }
+                return tmp;
             }
-            java.awt.Desktop.getDesktop().open(tmp);
+        };
 
-        } catch (Exception e) {
-            log.error("Error generando PDF para venta {}", ventaId, e);
-            new Alert(Alert.AlertType.ERROR, "No se pudo generar el PDF: " + e.getMessage()).showAndWait();
-        }
+        task.setOnSucceeded(e -> {
+            File pdfFile = task.getValue();
+            try {
+                new ProcessBuilder("cmd", "/c", "start", "", pdfFile.getAbsolutePath()).start();
+            } catch (IOException ex) {
+                log.warn("No se pudo abrir el PDF automáticamente: {}", ex.getMessage());
+                new Alert(Alert.AlertType.INFORMATION,
+                        "PDF guardado en:\n" + pdfFile.getAbsolutePath()).showAndWait();
+            }
+        });
+
+        task.setOnFailed(e -> {
+            Throwable ex = task.getException();
+            log.error("Error generando PDF para venta {}", ventaId, ex);
+            String tipo = ex.getClass().getSimpleName();
+            String msg = ex.getMessage() != null ? ex.getMessage() : "(sin mensaje)";
+            String causa = (ex.getCause() != null && ex.getCause().getMessage() != null)
+                    ? "\nCausa: " + ex.getCause().getMessage() : "";
+            new Alert(Alert.AlertType.ERROR,
+                    "No se pudo generar el PDF\n" + tipo + ": " + msg + causa)
+                    .showAndWait();
+        });
+
+        new Thread(task, "pdf-gen-" + ventaId).start();
     }
 
     private void resetPos() {
         carrito.clear();
         txtDescuento.setText("0");
         txtNotas.clear();
+        chkVentaVirtual.setSelected(false);
         cmbCliente.setValue(null);
         rbEfectivo.setSelected(true);
         lblError.setText("");

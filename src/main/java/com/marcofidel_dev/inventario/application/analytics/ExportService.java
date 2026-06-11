@@ -10,9 +10,9 @@ public interface ExportService {
 
     byte[] exportarReporteVentasExcel(FiltroReporteDTO filtro);
 
-    byte[] exportarInventarioPDF();
+    byte[] exportarInventarioPDF(LocalDate desde, LocalDate hasta);
 
-    byte[] exportarInventarioExcel();
+    byte[] exportarInventarioExcel(LocalDate desde, LocalDate hasta);
 
     byte[] exportarClientesExcel(LocalDate desde, LocalDate hasta);
 }

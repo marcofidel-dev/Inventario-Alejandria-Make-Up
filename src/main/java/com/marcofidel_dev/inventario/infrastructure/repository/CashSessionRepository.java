@@ -36,7 +36,8 @@ public interface CashSessionRepository extends JpaRepository<CashSession, Long> 
             cs.status                           AS status
         FROM cash_session cs
         JOIN users u ON u.id = cs.user_id
-        WHERE cs.opening_date >= :desde AND cs.opening_date < :hasta
+        WHERE DATETIME(cs.opening_date/1000, 'unixepoch') >= :desde
+          AND DATETIME(cs.opening_date/1000, 'unixepoch') < :hasta
         ORDER BY cs.opening_date DESC
         """, nativeQuery = true)
     List<SesionResumenProjection> findSesionesPorRango(@Param("desde") LocalDateTime desde,
@@ -51,7 +52,8 @@ public interface CashSessionRepository extends JpaRepository<CashSession, Long> 
             COALESCE(ROUND(SUM(CASE WHEN cs.cash_difference > 0 THEN cs.cash_difference ELSE 0 END), 2), 0) AS totalSobrante
         FROM cash_session cs
         JOIN users u ON u.id = cs.user_id
-        WHERE cs.opening_date >= :desde AND cs.opening_date < :hasta
+        WHERE DATETIME(cs.opening_date/1000, 'unixepoch') >= :desde
+          AND DATETIME(cs.opening_date/1000, 'unixepoch') < :hasta
           AND cs.status = 'CERRADA'
           AND cs.cash_difference IS NOT NULL
           AND cs.cash_difference != 0
@@ -64,7 +66,8 @@ public interface CashSessionRepository extends JpaRepository<CashSession, Long> 
     @Query(value = """
         SELECT COUNT(cs.id)
         FROM cash_session cs
-        WHERE cs.opening_date >= :desde AND cs.opening_date < :hasta
+        WHERE DATETIME(cs.opening_date/1000, 'unixepoch') >= :desde
+          AND DATETIME(cs.opening_date/1000, 'unixepoch') < :hasta
           AND cs.status = 'CERRADA'
           AND cs.cash_difference IS NOT NULL
           AND cs.cash_difference != 0

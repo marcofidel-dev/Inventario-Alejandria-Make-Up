@@ -147,7 +147,26 @@ public class Producto {
     }
 
     public enum TipoProducto {
-        MAQUILLAJE, BOLSO, BISUTERIA
+        MAQUILLAJE("Maquillaje"),
+        BOLSO("Bolso"),
+        BISUTERIA("Bisutería"),
+        CUIDADO_CORPORAL("Cuidado Corporal"),
+        SKINCARE("Skincare");
+
+        private final String label;
+
+        TipoProducto(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 }
 

@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import com.marcofidel_dev.inventario.shared.money.MoneyCOP;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -33,7 +35,8 @@ public class ReporteInventarioServiceImpl implements ReporteInventarioService {
     @Transactional(readOnly = true)
     public ValoracionInventarioDTO getValoracionActual() {
         return cache.compute("valoracion", () -> {
-            Object[] row = productoRepository.findValoracionRaw();
+            List<Object[]> rows = productoRepository.findValoracionRaw();
+            Object[] row = (rows == null || rows.isEmpty()) ? null : rows.get(0);
             if (row == null || row[0] == null) {
                 return new ValoracionInventarioDTO(
                         BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
@@ -135,7 +138,14 @@ public class ReporteInventarioServiceImpl implements ReporteInventarioService {
 
     private BigDecimal toBD(Object o) {
         if (o == null) return MoneyCOP.ZERO;
-        return MoneyCOP.normalize(new BigDecimal(o.toString()));
+        String s = o.toString().trim();
+        if (s.isEmpty()) return MoneyCOP.ZERO;
+        try {
+            return MoneyCOP.normalize(new BigDecimal(s));
+        } catch (NumberFormatException e) {
+            log.warn("toBD: BigDecimal parse failed for '{}', falling back to Double.parseDouble", s);
+            return MoneyCOP.normalize(BigDecimal.valueOf(Double.parseDouble(s)));
+        }
     }
 
     private int toInt(Object o) {

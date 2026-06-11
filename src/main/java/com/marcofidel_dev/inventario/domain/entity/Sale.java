@@ -73,6 +73,9 @@ public class Sale {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "virtual_sale", columnDefinition = "boolean not null default false")
+    private boolean virtualSale = false;
+
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

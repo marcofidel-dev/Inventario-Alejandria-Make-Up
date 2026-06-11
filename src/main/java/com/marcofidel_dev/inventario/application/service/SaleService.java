@@ -93,6 +93,7 @@ public class SaleService {
         sale.setStatus(SaleStatus.COMPLETADA);
         sale.setDiscountPercent(descuento);
         sale.setNotes(dto.notes());
+        sale.setVirtualSale(dto.virtualSale());
 
         if (dto.customerId() != null) {
             Customer customer = customerRepository.findById(dto.customerId())

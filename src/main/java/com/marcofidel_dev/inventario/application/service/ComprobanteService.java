@@ -77,9 +77,9 @@ public class ComprobanteService {
         float contentW = pageW - margin * 2;
 
         try (PdfWriter writer = new PdfWriter(baos);
-             PdfDocument pdfDoc = new PdfDocument(writer)) {
+             PdfDocument pdfDoc = new PdfDocument(writer);
+             Document doc = new Document(pdfDoc, new PageSize(pageW, pageH))) {
 
-            Document doc = new Document(pdfDoc, new PageSize(pageW, pageH));
             doc.setMargins(margin, margin, margin, margin);
 
             PdfFont mono     = PdfFontFactory.createFont(StandardFonts.COURIER);
@@ -99,7 +99,7 @@ public class ComprobanteService {
             String sellerName = userRepository.findById(sale.getUserId())
                     .map(u -> u.getFullName() != null ? u.getFullName() : u.getUsername())
                     .orElse("Colaborador");
-            doc.add(line("Atendiо: " + sellerName, mono, FONT_SIZE, TextAlignment.LEFT));
+            doc.add(line("Atendio: " + sellerName, mono, FONT_SIZE, TextAlignment.LEFT));
 
             String clientName = (sale.getCustomer() != null) ? sale.getCustomer().getName() : "Ocasional";
             doc.add(line("Cliente: " + clientName, mono, FONT_SIZE, TextAlignment.LEFT));
@@ -151,8 +151,7 @@ public class ComprobanteService {
 
             // ── Footer ────────────────────────────────────────────────
             doc.add(sep(mono));
-            doc.add(line("¡Gracias por tu compra!", mono, FONT_SIZE, TextAlignment.CENTER));
-            doc.add(line("Siguenos en @alejandria",  mono, FONT_SIZE, TextAlignment.CENTER));
+            doc.add(line("Gracias por tu compra! siguenos en @alejandria_make_up", mono, FONT_SIZE, TextAlignment.CENTER));
 
         } catch (Exception e) {
             log.error("Error al generar PDF del comprobante para venta {}: {}", sale.getId(), e.getMessage(), e);
