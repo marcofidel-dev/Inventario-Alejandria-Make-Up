@@ -118,7 +118,7 @@
                     <Button text="📊 Exportar Excel" onAction="#exportarExcel" maxWidth="Infinity"
                             style="-fx-background-color: #388E3C; -fx-text-fill: white; -fx-background-radius: 8;
                                    -fx-padding: 10; -fx-font-weight: 600; -fx-cursor: hand;"/>
-                    <ProgressIndicator fx:id="progressExport" prefSize="32" visible="false"/>
+                    <ProgressIndicator fx:id="progressExport" prefWidth="32" prefHeight="32" visible="false"/>
                 </VBox>
             </HBox>
 
